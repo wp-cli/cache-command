@@ -1,6 +1,6 @@
 {
     "name": "wp-cli/cache-command",
-    "description": "Manage the object and transient caches.",
+    "description": "Manage object and transient caches.",
     "type": "wp-cli-package",
     "homepage": "https://github.com/wp-cli/cache-command",
     "support": {
