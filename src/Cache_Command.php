@@ -335,5 +335,3 @@ class Cache_Command extends WP_CLI_Command {
 	}
 
 }
-
-WP_CLI::add_command( 'cache', 'Cache_Command' );
