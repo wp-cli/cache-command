@@ -1,7 +1,7 @@
 wp-cli/cache-command
 ====================
 
-Manage the object and transient caches.
+Manage object and transient caches.
 
 [![Build Status](https://travis-ci.org/wp-cli/cache-command.svg?branch=master)](https://travis-ci.org/wp-cli/cache-command)
 
