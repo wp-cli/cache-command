@@ -1,7 +1,11 @@
 <?php
 
 /**
- * Manage the object cache.
+ * The cache command manipulates the WP Object Cache, an object containing data which may be 
+ * computationally expensive to regenerate, like the results of complex database queries. For more 
+ * information on the WP Object Cache see:  
+ * https://codex.wordpress.org/Class_Reference/WP_Object_Cache
+ * 
  *
  * Use a persistent object cache drop-in to persist cache values between requests.
  *
