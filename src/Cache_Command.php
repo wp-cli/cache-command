@@ -2,7 +2,7 @@
 
 /**
  * The cache command manipulates the WP Object Cache. Codex: https://codex.wordpress.org/Class_Reference/WP_Object_Cache.
- * This is a a test
+ *
  *
  * Use a persistent object cache drop-in to persist cache values between requests.
  *
