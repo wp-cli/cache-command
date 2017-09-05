@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manipulates the WP Object Cache. 
+ * Manipulates the WP Object Cache
  *
  *
  * Use a persistent object cache drop-in to persist cache values between requests.
