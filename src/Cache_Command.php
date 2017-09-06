@@ -1,9 +1,11 @@
 <?php
 
 /**
- * Manage the object cache.
+ * Manipulates the WP Object Cache.
+ *
  *
  * Use a persistent object cache drop-in to persist cache values between requests.
+ * [WP Object Cache](https://codex.wordpress.org/Class_Reference/WP_Object_Cache)
  *
  * ## EXAMPLES
  *
