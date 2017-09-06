@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manage transients.
+ * Manage WordPress transient and standardized way of storing cached data in the database temporarily base.
  *
  * ## EXAMPLES
  *
