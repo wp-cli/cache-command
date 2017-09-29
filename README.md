@@ -13,13 +13,18 @@ This package implements the following commands:
 
 ### wp cache
 
-Manage the object cache.
+Manipulate the WP Object Cache object.
 
 ~~~
 wp cache
 ~~~
 
-Use a persistent object cache drop-in to persist cache values between requests.
+By default, the WP Object Cache exists in PHP memory for the length of the
+request (and is emptied at the end). Use a persistent object cache drop-in
+to persist the object cache between request.
+
+[Read the codex article](https://codex.wordpress.org/Class_Reference/WP_Object_Cache)
+for more detail.
 
 **EXAMPLES**
 
@@ -35,11 +40,15 @@ Use a persistent object cache drop-in to persist cache values between requests.
 
 ### wp transient
 
-Manage transients.
+Manipulate the WordPress Transient Cache.
 
 ~~~
 wp transient
 ~~~
+
+By default, the transient cache uses the WordPress database to persist values
+between requests. When a persistent object cache drop-in is installed, the
+transient cache also uses the WordPress Object Cache.
 
 **EXAMPLES**
 
