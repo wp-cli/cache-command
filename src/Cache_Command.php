@@ -5,7 +5,7 @@
  *
  * By default, the WP Object Cache exists in PHP memory for the length of the
  * request (and is emptied at the end). Use a persistent object cache drop-in
- * to persist the object cache between request.
+ * to persist the object cache between requests.
  *
  * [Read the codex article](https://codex.wordpress.org/Class_Reference/WP_Object_Cache)
  * for more detail.
