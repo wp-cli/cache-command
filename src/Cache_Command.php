@@ -178,7 +178,7 @@ class Cache_Command extends WP_CLI_Command {
 	 * : Method for grouping data within the cache which allows the same key to be used across groups.
 	 * ---
 	 * default: default
-	 * ___
+	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
