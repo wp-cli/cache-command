@@ -38,6 +38,293 @@ for more detail.
 
 
 
+### wp cache add
+
+Add a value to the object cache.
+
+~~~
+wp cache add <key> <value> [<group>] [<expiration>]
+~~~
+
+Errors if a value already exists for the key, which means the value can't
+be added.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	<value>
+		Value to add to the key.
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+	[<expiration>]
+		Define how long to keep the value, in seconds. `0` means as long as possible.
+		---
+		default: 0
+		---
+
+**EXAMPLES**
+
+    # Add cache.
+    $ wp cache add my_key my_group my_value 300
+    Success: Added object 'my_key' in group 'my_value'.
+
+
+
+### wp cache decr
+
+Decrement a value in the object cache.
+
+~~~
+wp cache decr <key> [<offset>] [<group>]
+~~~
+
+Errors if the value can't be decremented.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	[<offset>]
+		The amount by which to decrement the item's value.
+		---
+		default: 1
+		---
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+**EXAMPLES**
+
+    # Decrease cache value.
+    $ wp cache decr my_key 2 my_group
+    48
+
+
+
+### wp cache delete
+
+Remove a value from the object cache.
+
+~~~
+wp cache delete <key> [<group>]
+~~~
+
+Errors if the value can't be deleted.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+**EXAMPLES**
+
+    # Delete cache.
+    $ wp cache delete my_key my_group
+    Success: Object deleted.
+
+
+
+### wp cache flush
+
+Flush the object cache.
+
+~~~
+wp cache flush 
+~~~
+
+For WordPress multisite instances using a persistent object cache,
+flushing the object cache will typically flush the cache for all sites.
+Beware of the performance impact when flushing the object cache in
+production.
+
+Errors if the object cache can't be flushed.
+
+**EXAMPLES**
+
+    # Flush cache.
+    $ wp cache flush
+    Success: The cache was flushed.
+
+
+
+### wp cache get
+
+Get a value from the object cache.
+
+~~~
+wp cache get <key> [<group>]
+~~~
+
+Errors if the value doesn't exist.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+**EXAMPLES**
+
+    # Get cache.
+    $ wp cache get my_key my_group
+    my_value
+
+
+
+### wp cache incr
+
+Increment a value in the object cache.
+
+~~~
+wp cache incr <key> [<offset>] [<group>]
+~~~
+
+Errors if the value can't be incremented.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	[<offset>]
+		The amount by which to increment the item's value.
+		---
+		default: 1
+		---
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+**EXAMPLES**
+
+    # Increase cache value.
+    $ wp cache incr my_key 2 my_group
+    50
+
+
+
+### wp cache replace
+
+Replace a value in the object cache, if the value already exists.
+
+~~~
+wp cache replace <key> <value> [<group>] [<expiration>]
+~~~
+
+Errors if the value can't be replaced.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	<value>
+		Value to replace.
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+	[<expiration>]
+		Define how long to keep the value, in seconds. `0` means as long as possible.
+		---
+		default: 0
+		---
+
+**EXAMPLES**
+
+    # Replace cache.
+    $ wp cache replace my_key new_value my_group
+    Success: Replaced object 'my_key' in group 'my_group'.
+
+
+
+### wp cache set
+
+Set a value to the object cache, regardless of whether it already exists.
+
+~~~
+wp cache set <key> <value> [<group>] [<expiration>]
+~~~
+
+Errors if the value can't be set.
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	<value>
+		Value to set on the key.
+
+	[<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+	[<expiration>]
+		Define how long to keep the value, in seconds. `0` means as long as possible.
+		---
+		default: 0
+		---
+
+**EXAMPLES**
+
+    # Set cache.
+    $ wp cache set my_key my_value my_group 300
+    Success: Set object 'my_key' in group 'my_group'.
+
+
+
+### wp cache type
+
+Attempts to determine which object cache is being used.
+
+~~~
+wp cache type 
+~~~
+
+Note that the guesses made by this function are based on the
+WP_Object_Cache classes that define the 3rd party object cache extension.
+Changes to those classes could render problems with this function's
+ability to determine which object cache is being used.
+
+**EXAMPLES**
+
+    # Check cache type.
+    $ wp cache type
+    Default
+
+
+
 ### wp transient
 
 Manipulate the WordPress Transient Cache.
@@ -71,6 +358,130 @@ transient cache also uses the WordPress Object Cache.
     # Delete all transients.
     $ wp transient delete --all
     Success: 14 transients deleted from the database.
+
+
+
+### wp transient delete
+
+Delete a transient value.
+
+~~~
+wp transient delete [<key>] [--network] [--all] [--expired]
+~~~
+
+**OPTIONS**
+
+	[<key>]
+		Key for the transient.
+
+	[--network]
+		Delete the value of a network transient, instead of that on a single site.
+
+	[--all]
+		Delete all transients.
+
+	[--expired]
+		Delete all expired transients.
+
+**EXAMPLES**
+
+    # Delete transient.
+    $ wp transient delete sample_key
+    Success: Transient deleted.
+
+    # Delete expired transients.
+    $ wp transient delete --expired
+    Success: 12 expired transients deleted from the database.
+
+    # Delete all transients.
+    $ wp transient delete --all
+    Success: 14 transients deleted from the database.
+
+
+
+### wp transient get
+
+Get a transient value.
+
+~~~
+wp transient get <key> [--format=<format>] [--network]
+~~~
+
+**OPTIONS**
+
+	<key>
+		Key for the transient.
+
+	[--format=<format>]
+		Render output in a particular format.
+		---
+		default: table
+		options:
+		  - table
+		  - csv
+		  - json
+		  - yaml
+		---
+
+	[--network]
+		Get the value of the network transient, instead of the single site.
+
+**EXAMPLES**
+
+    $ wp transient get sample_key
+    test data
+
+    $ wp transient get random_key
+    Warning: Transient with key "random_key" is not set.
+
+
+
+### wp transient set
+
+Set a transient value.
+
+~~~
+wp transient set <key> <value> [<expiration>] [--network]
+~~~
+
+`<expiration>` is the time until expiration, in seconds.
+
+**OPTIONS**
+
+	<key>
+		Key for the transient.
+
+	<value>
+		Value to be set for the transient.
+
+	[<expiration>]
+		Time until expiration, in seconds.
+
+	[--network]
+		Set the transient value on the network, instead of single site.
+
+**EXAMPLES**
+
+    $ wp transient set sample_key "test data" 3600
+    Success: Transient added.
+
+
+
+### wp transient type
+
+Determine type of transients implementation.
+
+~~~
+wp transient type 
+~~~
+
+Indicates whether the transients API is using an object cache or the
+options table.
+
+**EXAMPLES**
+
+    $ wp transient type
+    Transients are saved to the wp_options table.
 
 ## Installing
 
