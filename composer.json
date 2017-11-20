@@ -34,7 +34,20 @@
         "bundled": true,
         "commands": [
             "cache",
-            "transient"
+            "cache add",
+            "cache decr",
+            "cache delete",
+            "cache flush",
+            "cache get",
+            "cache incr",
+            "cache replace",
+            "cache set",
+            "cache type",
+            "transient",
+            "transient delete",
+            "transient get",
+            "transient set",
+            "transient type"
         ]
     }
 }
