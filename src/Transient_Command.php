@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manipulate the WordPress Transient Cache.
+ * Manipulates the WordPress Transient Cache.
  *
  * By default, the transient cache uses the WordPress database to persist values
  * between requests. When a persistent object cache drop-in is installed, the
@@ -32,7 +32,7 @@
 class Transient_Command extends WP_CLI_Command {
 
 	/**
-	 * Get a transient value.
+	 * Gets a transient value.
 	 *
 	 * ## OPTIONS
 	 *
@@ -76,7 +76,7 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Set a transient value.
+	 * Sets a transient value.
 	 *
 	 * `<expiration>` is the time until expiration, in seconds.
 	 *
@@ -113,7 +113,7 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Delete a transient value.
+	 * Deletes a transient value.
 	 *
 	 * ## OPTIONS
 	 *
@@ -176,7 +176,7 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Determine type of transients implementation.
+	 * Determines the type of transients implementation.
 	 *
 	 * Indicates whether the transients API is using an object cache or the
 	 * options table.
@@ -198,7 +198,7 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Delete all expired transients.
+	 * Deletes all expired transients.
 	 */
 	private function delete_expired() {
 		global $wpdb, $_wp_using_ext_object_cache;
@@ -225,7 +225,7 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Delete all transients.
+	 * Deletes all transients.
 	 */
 	private function delete_all() {
 		global $wpdb, $_wp_using_ext_object_cache;
