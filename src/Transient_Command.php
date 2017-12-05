@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manipulates the WordPress Transient Cache.
+ * Adds, gets, and deletes entries in the WordPress Transient Cache.
  *
  * By default, the transient cache uses the WordPress database to persist values
  * between requests. When a persistent object cache drop-in is installed, the
