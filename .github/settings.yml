@@ -1,6 +1,6 @@
 # Used by Probot Settings: https://probot.github.io/apps/settings/
 repository:
-  description: Manage object and transient caches.
+  description: Manages object and transient caches.
 labels:
   - name: bug
     color: fc2929
