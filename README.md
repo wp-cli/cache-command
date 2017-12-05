@@ -13,7 +13,7 @@ This package implements the following commands:
 
 ### wp cache
 
-Manipulate the WP Object Cache object.
+Adds, removes, fetches, and flushes the WP Object Cache object.
 
 ~~~
 wp cache
@@ -40,7 +40,7 @@ for more detail.
 
 ### wp cache add
 
-Add a value to the object cache.
+Adds a value to the object cache.
 
 ~~~
 wp cache add <key> <value> [<group>] [<expiration>]
@@ -79,7 +79,7 @@ be added.
 
 ### wp cache decr
 
-Decrement a value in the object cache.
+Decrements a value in the object cache.
 
 ~~~
 wp cache decr <key> [<offset>] [<group>]
@@ -114,7 +114,7 @@ Errors if the value can't be decremented.
 
 ### wp cache delete
 
-Remove a value from the object cache.
+Removes a value from the object cache.
 
 ~~~
 wp cache delete <key> [<group>]
@@ -143,7 +143,7 @@ Errors if the value can't be deleted.
 
 ### wp cache flush
 
-Flush the object cache.
+Flushes the object cache.
 
 ~~~
 wp cache flush 
@@ -166,7 +166,7 @@ Errors if the object cache can't be flushed.
 
 ### wp cache get
 
-Get a value from the object cache.
+Gets a value from the object cache.
 
 ~~~
 wp cache get <key> [<group>]
@@ -195,7 +195,7 @@ Errors if the value doesn't exist.
 
 ### wp cache incr
 
-Increment a value in the object cache.
+Increments a value in the object cache.
 
 ~~~
 wp cache incr <key> [<offset>] [<group>]
@@ -230,7 +230,7 @@ Errors if the value can't be incremented.
 
 ### wp cache replace
 
-Replace a value in the object cache, if the value already exists.
+Replaces a value in the object cache, if the value already exists.
 
 ~~~
 wp cache replace <key> <value> [<group>] [<expiration>]
@@ -268,7 +268,7 @@ Errors if the value can't be replaced.
 
 ### wp cache set
 
-Set a value to the object cache, regardless of whether it already exists.
+Sets a value to the object cache, regardless of whether it already exists.
 
 ~~~
 wp cache set <key> <value> [<group>] [<expiration>]
@@ -327,7 +327,7 @@ ability to determine which object cache is being used.
 
 ### wp transient
 
-Manipulate the WordPress Transient Cache.
+Adds, gets, and deletes entries in the WordPress Transient Cache.
 
 ~~~
 wp transient
@@ -363,7 +363,7 @@ transient cache also uses the WordPress Object Cache.
 
 ### wp transient delete
 
-Delete a transient value.
+Deletes a transient value.
 
 ~~~
 wp transient delete [<key>] [--network] [--all] [--expired]
@@ -401,7 +401,7 @@ wp transient delete [<key>] [--network] [--all] [--expired]
 
 ### wp transient get
 
-Get a transient value.
+Gets a transient value.
 
 ~~~
 wp transient get <key> [--format=<format>] [--network]
@@ -438,7 +438,7 @@ wp transient get <key> [--format=<format>] [--network]
 
 ### wp transient set
 
-Set a transient value.
+Sets a transient value.
 
 ~~~
 wp transient set <key> <value> [<expiration>] [--network]
@@ -469,7 +469,7 @@ wp transient set <key> <value> [<expiration>] [--network]
 
 ### wp transient type
 
-Determine type of transients implementation.
+Determines the type of transients implementation.
 
 ~~~
 wp transient type 
