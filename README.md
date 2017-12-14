@@ -334,8 +334,13 @@ wp transient
 ~~~
 
 By default, the transient cache uses the WordPress database to persist values
-between requests. When a persistent object cache drop-in is installed, the
-transient cache also uses the WordPress Object Cache.
+between requests. On a single site installation, values are stored in the
+`wp_options` table. On a multisite installation, values are stored in the
+`wp_options` or the `wp_sitemeta` table, depending on use of the `--network`
+flag.
+
+When a persistent object cache drop-in is installed (e.g. Redis or Memcached),
+the transient cache skips the database and simply wraps the WP Object Cache.
 
 **EXAMPLES**
 
@@ -369,13 +374,18 @@ Deletes a transient value.
 wp transient delete [<key>] [--network] [--all] [--expired]
 ~~~
 
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
+
 **OPTIONS**
 
 	[<key>]
 		Key for the transient.
 
 	[--network]
-		Delete the value of a network transient, instead of that on a single site.
+		Delete the value of a network|site transient. On single site, this is
+		is a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
 
 	[--all]
 		Delete all transients.
@@ -407,6 +417,9 @@ Gets a transient value.
 wp transient get <key> [--format=<format>] [--network]
 ~~~
 
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
+
 **OPTIONS**
 
 	<key>
@@ -424,7 +437,9 @@ wp transient get <key> [--format=<format>] [--network]
 		---
 
 	[--network]
-		Get the value of the network transient, instead of the single site.
+		Get the value of a network|site transient. On single site, this is
+		is a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
 
 **EXAMPLES**
 
@@ -446,6 +461,9 @@ wp transient set <key> <value> [<expiration>] [--network]
 
 `<expiration>` is the time until expiration, in seconds.
 
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
+
 **OPTIONS**
 
 	<key>
@@ -458,7 +476,9 @@ wp transient set <key> <value> [<expiration>] [--network]
 		Time until expiration, in seconds.
 
 	[--network]
-		Set the transient value on the network, instead of single site.
+		Set the value of a network|site transient. On single site, this is
+		is a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
 
 **EXAMPLES**
 
@@ -477,6 +497,9 @@ wp transient type
 
 Indicates whether the transients API is using an object cache or the
 options table.
+
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
 
 **EXAMPLES**
 
