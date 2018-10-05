@@ -176,6 +176,9 @@ class Cache_Command extends WP_CLI_Command {
 	 *
 	 * [<group>]
 	 * : Method for grouping data within the cache which allows the same key to be used across groups.
+	 *
+	 * [--global]
+	 * : Add group to global groups before getting cache
 	 * ---
 	 * default: default
 	 * ---
@@ -188,6 +191,13 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
+
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+
+		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
+			wp_cache_add_global_groups( array( $group ) );
+		}
+
 		$value = wp_cache_get( $key, $group );
 
 		if ( false === $value ) {
