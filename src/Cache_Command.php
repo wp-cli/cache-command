@@ -181,7 +181,7 @@ class Cache_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--global]
-	 * : Check as if global group
+	 * : Add group to global groups before getting cache
 	 *
 	 * ## EXAMPLES
 	 *
