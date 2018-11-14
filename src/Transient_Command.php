@@ -297,12 +297,8 @@ class Transient_Command extends WP_CLI_Command {
 
 		$count = $wpdb->query(
 			$wpdb->prepare(
-				"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
-					WHERE a.option_name LIKE %s
-					AND a.option_name NOT LIKE %s
-					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )",
-				$wpdb->esc_like( '_transient_' ) . '%',
-				$wpdb->esc_like( '_transient_timeout_' ) . '%'
+				"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+				$wpdb->esc_like( '_transient_' ) . '%'
 			)
 		);
 
@@ -310,31 +306,20 @@ class Transient_Command extends WP_CLI_Command {
 			// Non-Multisite stores site transients in the options table.
 			$count += $wpdb->query(
 				$wpdb->prepare(
-					"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
-						WHERE a.option_name LIKE %s
-						AND a.option_name NOT LIKE %s
-						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )",
-					$wpdb->esc_like( '_site_transient_' ) . '%',
-					$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
+					"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+					$wpdb->esc_like( '_site_transient_' ) . '%'
 				)
 			);
 		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
 			// Multisite stores site transients in the sitemeta table.
-			$count += $wpdb->query(
-				$wpdb->prepare(
-					"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
-						WHERE a.meta_key LIKE %s
-						AND a.meta_key NOT LIKE %s
-						AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )",
-					$wpdb->esc_like( '_site_transient_' ) . '%',
-					$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
-				)
+			$count += $wpdb->prepare(
+				"DELETE FROM $wpdb->sitemeta WHERE option_name LIKE %s",
+				$wpdb->esc_like( '_site_transient_' ) . '%'
 			);
 		}
 
-		// The above queries delete the transient and the transient timeout
-		// thus each transient is counted twice.
-		$count = $count / 2;
+		// The above queries delete the transient and the transient timeout if exists
+		// thus some transients may be counted twice.
 
 		if ( $count > 0 ) {
 			$success_message = ( 1 === $count ) ? '%d transient deleted from the database.' : '%d transients deleted from the database.';
