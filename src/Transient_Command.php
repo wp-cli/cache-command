@@ -276,7 +276,8 @@ class Transient_Command extends WP_CLI_Command {
 		$count = $count / 2;
 
 		if ( $count > 0 ) {
-			WP_CLI::success( "$count expired transients deleted from the database." );
+			$success_message = ( 1 === $count ) ? '%d expired transient deleted from the database.' : '%d expired transients deleted from the database.';
+			WP_CLI::success( sprintf( $success_message, $count ) );
 		} else {
 			WP_CLI::success( 'No expired transients found.' );
 		}
@@ -336,7 +337,8 @@ class Transient_Command extends WP_CLI_Command {
 		$count = $count / 2;
 
 		if ( $count > 0 ) {
-			WP_CLI::success( "$count transients deleted from the database." );
+			$success_message = ( 1 === $count ) ? '%d transient deleted from the database.' : '%d transients deleted from the database.';
+			WP_CLI::success( sprintf( $success_message, $count ) );
 		} else {
 			WP_CLI::success( 'No transients found.' );
 		}
