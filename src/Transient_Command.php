@@ -272,7 +272,7 @@ class Transient_Command extends WP_CLI_Command {
 		}
 
 		// The above queries delete the transient and the transient timeout
-		// thus each transient is counted as 2.
+		// thus each transient is counted twice.
 		$count = $count / 2;
 
 		if ( $count > 0 ) {
@@ -288,26 +288,61 @@ class Transient_Command extends WP_CLI_Command {
 
 	/**
 	 * Deletes all transients.
+	 *
+	 * Always deletes the transients from the database too.
 	 */
 	private function delete_all() {
-		global $wpdb, $_wp_using_ext_object_cache;
+		global $wpdb;
 
-		// Always delete all transients from DB too.
 		$count = $wpdb->query(
-			"DELETE FROM $wpdb->options
-			WHERE option_name LIKE '\_transient\_%'
-			OR option_name LIKE '\_site\_transient\_%'"
+			$wpdb->prepare(
+				"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+					WHERE a.option_name LIKE %s
+					AND a.option_name NOT LIKE %s
+					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )",
+				$wpdb->esc_like( '_transient_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_' ) . '%'
+			)
 		);
+
+		if ( ! is_multisite() ) {
+			// Non-Multisite stores site transients in the options table.
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )",
+					$wpdb->esc_like( '_site_transient_' ) . '%',
+					$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
+				)
+			);
+		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
+			// Multisite stores site transients in the sitemeta table.
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+						WHERE a.meta_key LIKE %s
+						AND a.meta_key NOT LIKE %s
+						AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )",
+					$wpdb->esc_like( '_site_transient_' ) . '%',
+					$wpdb->esc_like( '_site_transient_timeout_' ) . '%'
+				)
+			);
+		}
+
+		// The above queries delete the transient and the transient timeout
+		// thus each transient is counted twice.
+		$count = $count / 2;
 
 		if ( $count > 0 ) {
 			WP_CLI::success( "$count transients deleted from the database." );
 		} else {
-			WP_CLI::success( "No transients found." );
+			WP_CLI::success( 'No transients found.' );
 		}
 
-		if ( $_wp_using_ext_object_cache ) {
-			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.');
+		if ( wp_using_ext_object_cache() ) {
+			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.' );
 		}
 	}
-
 }
