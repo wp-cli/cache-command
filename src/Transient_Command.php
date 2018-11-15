@@ -283,7 +283,7 @@ class Transient_Command extends WP_CLI_Command {
 		global $wpdb;
 
 		$count = $wpdb->query(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%'"
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_%'"
 		);
 
 		if ( ! is_multisite() ) {
