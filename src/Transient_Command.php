@@ -225,7 +225,7 @@ class Transient_Command extends WP_CLI_Command {
 	/**
 	 * Deletes all expired transients.
 	 *
-	 * Always deletes the transients from the database too.
+	 * Only deletes the expired transients from the database.
 	 */
 	private function delete_expired() {
 		global $wpdb;
@@ -297,7 +297,7 @@ class Transient_Command extends WP_CLI_Command {
 	/**
 	 * Deletes all transients.
 	 *
-	 * Always deletes the transients from the database too.
+	 * Only deletes the transients from the database.
 	 */
 	private function delete_all() {
 		global $wpdb;
