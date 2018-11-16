@@ -257,7 +257,7 @@ class Transient_Command extends WP_CLI_Command {
 					time()
 				)
 			);
-		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
+		} else {
 			// Multisite stores site transients in the sitemeta table.
 			$count += $wpdb->query(
 				$wpdb->prepare(
@@ -317,7 +317,7 @@ class Transient_Command extends WP_CLI_Command {
 					Utils\esc_like( '_site_transient_' ) . '%'
 				)
 			);
-		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
+		} else {
 			// Multisite stores site transients in the sitemeta table.
 			$count += $wpdb->prepare(
 				"DELETE FROM $wpdb->sitemeta WHERE option_name LIKE %s",
