@@ -319,9 +319,11 @@ class Transient_Command extends WP_CLI_Command {
 			);
 		} else {
 			// Multisite stores site transients in the sitemeta table.
-			$count += $wpdb->prepare(
-				"DELETE FROM $wpdb->sitemeta WHERE option_name LIKE %s",
-				Utils\esc_like( '_site_transient_' ) . '%'
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM $wpdb->sitemeta WHERE meta_key LIKE %s",
+					Utils\esc_like( '_site_transient_' ) . '%'
+				)
 			);
 		}
 
