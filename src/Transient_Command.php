@@ -1,5 +1,7 @@
 <?php
 
+use WP_CLI\Utils;
+
 /**
  * Adds, gets, and deletes entries in the WordPress Transient Cache.
  *
@@ -74,7 +76,7 @@ class Transient_Command extends WP_CLI_Command {
 	public function get( $args, $assoc_args ) {
 		list( $key ) = $args;
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+		$func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$value = $func( $key );
 
 		if ( false === $value ) {
@@ -117,9 +119,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function set( $args, $assoc_args ) {
 		list( $key, $value ) = $args;
 
-		$expiration = \WP_CLI\Utils\get_flag_value( $args, 2, 0 );
+		$expiration = Utils\get_flag_value( $args, 2, 0 );
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
+		$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
 		if ( $func( $key, $value, $expiration ) ) {
 			WP_CLI::success( 'Transient added.' );
 		} else {
@@ -166,8 +168,8 @@ class Transient_Command extends WP_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : NULL;
 
-		$all = \WP_CLI\Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = \WP_CLI\Utils\get_flag_value( $assoc_args, 'expired' );
+		$all = Utils\get_flag_value( $assoc_args, 'all' );
+		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
 
 		if ( true === $all ) {
 			$this->delete_all();
@@ -182,12 +184,12 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::error( 'Please specify transient key, or use --all or --expired.' );
 		}
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'delete_site_transient' : 'delete_transient';
+		$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'delete_site_transient' : 'delete_transient';
 
 		if ( $func( $key ) ) {
 			WP_CLI::success( 'Transient deleted.' );
 		} else {
-			$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+			$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 			if ( $func( $key ) )
 				WP_CLI::error( 'Transient was not deleted even though the transient appears to exist.' );
 			else
@@ -235,8 +237,8 @@ class Transient_Command extends WP_CLI_Command {
 					AND a.option_name NOT LIKE %s
 					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
 					AND b.option_value < %d",
-				\WP_CLI\Utils\esc_like( '_transient_' ) . '%',
-				\WP_CLI\Utils\esc_like( '_transient_timeout_' ) . '%',
+				Utils\esc_like( '_transient_' ) . '%',
+				Utils\esc_like( '_transient_timeout_' ) . '%',
 				time()
 			)
 		);
@@ -250,8 +252,8 @@ class Transient_Command extends WP_CLI_Command {
 						AND a.option_name NOT LIKE %s
 						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
 						AND b.option_value < %d",
-					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
-					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%',
+					Utils\esc_like( '_site_transient_' ) . '%',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%',
 					time()
 				)
 			);
@@ -264,8 +266,8 @@ class Transient_Command extends WP_CLI_Command {
 						AND a.meta_key NOT LIKE %s
 						AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
 						AND b.meta_value < %d",
-					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
-					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%',
+					Utils\esc_like( '_site_transient_' ) . '%',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%',
 					time()
 				)
 			);
@@ -298,7 +300,7 @@ class Transient_Command extends WP_CLI_Command {
 		$count = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
-				\WP_CLI\Utils\esc_like( '_transient_' ) . '%'
+				Utils\esc_like( '_transient_' ) . '%'
 			)
 		);
 
@@ -307,14 +309,14 @@ class Transient_Command extends WP_CLI_Command {
 			$count += $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
-					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%'
+					Utils\esc_like( '_site_transient_' ) . '%'
 				)
 			);
 		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
 			// Multisite stores site transients in the sitemeta table.
 			$count += $wpdb->prepare(
 				"DELETE FROM $wpdb->sitemeta WHERE option_name LIKE %s",
-				\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%'
+				Utils\esc_like( '_site_transient_' ) . '%'
 			);
 		}
 
