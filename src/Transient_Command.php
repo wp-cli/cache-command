@@ -228,33 +228,46 @@ class Transient_Command extends WP_CLI_Command {
 	private function delete_expired() {
 		global $wpdb;
 
-		$time = time();
-
 		$count = $wpdb->query(
-			"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
-				WHERE a.option_name LIKE '\\_transient\\_%'
-				AND a.option_name NOT LIKE '\\_transient\\_timeout\\_%'
-				AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-				AND b.option_value < {$time}"
+			$wpdb->prepare(
+				"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+					WHERE a.option_name LIKE %s
+					AND a.option_name NOT LIKE %s
+					AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
+					AND b.option_value < %d",
+				\WP_CLI\Utils\esc_like( '_transient_' ) . '%',
+				\WP_CLI\Utils\esc_like( '_transient_timeout_' ) . '%',
+				time()
+			)
 		);
 
 		if ( ! is_multisite() ) {
 			// Non-Multisite stores site transients in the options table.
 			$count += $wpdb->query(
-				"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
-					WHERE a.option_name LIKE '\\_site\\_transient\\_%'
-					AND a.option_name NOT LIKE '\\_site\\_transient\\_timeout\\_%'
-					AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
-					AND b.option_value < {$time}"
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
+						AND b.option_value < %d",
+					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
+					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%',
+					time()
+				)
 			);
 		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
 			// Multisite stores site transients in the sitemeta table.
 			$count += $wpdb->query(
-				"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
-					WHERE a.meta_key LIKE '\\_site\\_transient\\_%'
-					AND a.meta_key NOT LIKE '\\_site\\_transient\\_timeout\\_%'
-					AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
-					AND b.meta_value < {$time}"
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+						WHERE a.meta_key LIKE %s
+						AND a.meta_key NOT LIKE %s
+						AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
+						AND b.meta_value < %d",
+					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
+					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%',
+					time()
+				)
 			);
 		}
 
@@ -283,18 +296,25 @@ class Transient_Command extends WP_CLI_Command {
 		global $wpdb;
 
 		$count = $wpdb->query(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_%'"
+			$wpdb->prepare(
+				"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+				\WP_CLI\Utils\esc_like( '_transient_' ) . '%'
+			)
 		);
 
 		if ( ! is_multisite() ) {
 			// Non-Multisite stores site transients in the options table.
 			$count += $wpdb->query(
-				"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_site\\_transient\\_%'"
+				$wpdb->prepare(
+					"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%'
+				)
 			);
 		} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
 			// Multisite stores site transients in the sitemeta table.
-			$count += $wpdb->query(
-				"DELETE FROM {$wpdb->sitemeta} WHERE option_name LIKE '\\_site\\_transient\\_%'"
+			$count += $wpdb->prepare(
+				"DELETE FROM $wpdb->sitemeta WHERE option_name LIKE %s",
+				\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%'
 			);
 		}
 
