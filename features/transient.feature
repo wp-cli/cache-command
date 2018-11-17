@@ -141,6 +141,17 @@ Feature: Manage WordPress transient cache
       Warning: Transient with key "foo" is not set.
       """
 
+    When I run `wp transient delete --all`
+    And I run `wp transient set foo bar`
+    And I run `wp transient set foo2 bar2 600`
+    And I run `wp transient set foo3 bar3 --network`
+    And I run `wp transient set foo4 bar4 600 --network`
+    And I run `wp transient delete --all`
+    Then STDOUT should be:
+      """
+      Success: 4 transients deleted from the database.
+      """
+
   Scenario: Network transient delete and other flags
     Given a WP multisite install
 
@@ -210,4 +221,15 @@ Feature: Manage WordPress transient cache
     Then STDERR should be:
       """
       Warning: Transient with key "foo" is not set.
+      """
+
+    When I run `wp transient delete --all`
+    And I run `wp transient set foo bar`
+    And I run `wp transient set foo2 bar2 600`
+    And I run `wp transient set foo3 bar3 --network`
+    And I run `wp transient set foo4 bar4 600 --network`
+    And I run `wp transient delete --all`
+    Then STDOUT should be:
+      """
+      Success: 4 transients deleted from the database.
       """
