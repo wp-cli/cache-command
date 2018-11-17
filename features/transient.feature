@@ -55,12 +55,13 @@ Feature: Manage WordPress transient cache
       Success: Transient deleted.
       """
 
-    When I run `wp transient set foo bar --network`
+    When I run `wp transient delete --all`
+    And I run `wp transient set foo bar --network`
     And I run `wp transient set foo2 bar2 --network`
     And I run `wp transient delete --all`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transients deleted from the database.
+      Success: 2 transients deleted from the database.
       """
 
   Scenario: Transient delete and other flags
@@ -72,13 +73,14 @@ Feature: Manage WordPress transient cache
       Error: Please specify transient key, or use --all or --expired.
       """
 
-    When I run `wp transient set foo bar`
+    When I run `wp transient delete --all`
+    And I run `wp transient set foo bar`
     And I run `wp transient set foo2 bar2`
     And I run `wp transient set foo3 bar3 --network`
     And I run `wp transient delete --all`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transients deleted from the database.
+      Success: 3 transients deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -108,9 +110,9 @@ Feature: Manage WordPress transient cache
     # Change timeout to be in the past.
     When I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp transient delete --expired`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transient deleted from the database.
+      Success: 1 expired transient deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -128,9 +130,9 @@ Feature: Manage WordPress transient cache
     # Change timeout to be in the past.
     When I run `wp option update _site_transient_timeout_foo 1321009871`
     And I run `wp transient delete --expired`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transient deleted from the database.
+      Success: 1 expired transient deleted from the database.
       """
 
     When I try `wp transient get foo --network`
@@ -142,13 +144,14 @@ Feature: Manage WordPress transient cache
   Scenario: Network transient delete and other flags
     Given a WP multisite install
 
-    When I run `wp transient set foo bar`
+    When I run `wp transient delete --all`
+    And I run `wp transient set foo bar`
     And I run `wp transient set foo2 bar2`
     And I run `wp transient set foo3 bar3 --network`
     And I run `wp transient delete --all`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transients deleted from the database.
+      Success: 3 transients deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -178,9 +181,9 @@ Feature: Manage WordPress transient cache
     # Change timeout to be in the past.
     When I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp transient delete --expired`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transient deleted from the database.
+      Success: 1 expired transient deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -198,9 +201,9 @@ Feature: Manage WordPress transient cache
     # Change timeout to be in the past.
     When I run `wp site option update _site_transient_timeout_foo 1321009871`
     And I run `wp transient delete --expired`
-    Then STDOUT should contain:
+    Then STDOUT should be:
       """
-      transient deleted from the database.
+      Success: 1 expired transient deleted from the database.
       """
 
     When I try `wp transient get foo --network`
