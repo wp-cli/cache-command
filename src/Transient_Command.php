@@ -221,6 +221,139 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
+	 * Lists transients and their values.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--network]
+	 * : Get the values of network|site transients. On single site, this is
+	 * is a specially-named cache key. On multisite, this is a global cache
+	 * (instead of local to the site).
+	 *
+	 * [--unserialize]
+	 * : Unserialize transient values in output.
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific object fields.
+	 *
+	 * [--format=<format>]
+	 * : The serialization format for the value.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 *   - csv
+	 *   - count
+	 *   - yaml
+	 * ---
+	 *
+	 * ## AVAILABLE FIELDS
+	 *
+	 * This field will be displayed by default for each matching option:
+	 *
+	 * * name
+	 * * value
+	 * * expiration
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # List all transients
+	 *     $ wp transient list
+	*      +------+-------+---------------+
+	*      | name | value | expiration    |
+	*      +------+-------+---------------+
+	*      | foo  | bar   | 39 mins       |
+	*      | foo2 | bar2  | no expiration |
+	*      | foo3 | bar2  | expired       |
+	*      | foo4 | bar4  | 4 hours       |
+	*      +------+-------+---------------+
+	 *
+	 * @subcommand list
+	 */
+	public function _list( $args, $assoc_args ) {
+		global $wpdb;
+
+		$fields      = array( 'name', 'value', 'expiration' );
+		$network     = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network', false );
+		$unserialize = \WP_CLI\Utils\get_flag_value( $assoc_args, 'unserialize', false );
+
+		if ( isset( $assoc_args['fields'] ) ) {
+			$fields = explode( ',', $assoc_args['fields'] );
+		}
+
+		if ( $network ) {
+			if ( is_multisite() ) {
+				$query = $wpdb->prepare(
+					"SELECT `meta_key` as `name`, `meta_value` as `value` FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_key NOT LIKE %s",
+					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
+					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				);
+			} else {
+				$query = $wpdb->prepare(
+					"SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
+					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				);
+			}
+		} else {
+			$query = $wpdb->prepare(
+				"SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+				\WP_CLI\Utils\esc_like( '_transient_' ) . '%',
+				\WP_CLI\Utils\esc_like( '_transient_timeout_' ) . '%'
+			);
+		}
+
+		$results = $wpdb->get_results( $query );
+
+		foreach ( $results as $result ) {
+			$result->name       = str_replace( array( '_site_transient_', '_transient_' ), '', $result->name );
+			$result->expiration = $this->get_transient_expiration( $result->name, $network );
+
+			if ( $unserialize ) {
+				$result->value = maybe_unserialize( $result->value );
+			}
+		}
+
+		$formatter = new \WP_CLI\Formatter(
+			$assoc_args,
+			$fields
+		);
+		$formatter->display_items( $results );
+	}
+
+	/**
+	 * Retrieves the human-friendly expiration time.
+	 *
+	 * @param string $name              Transient name.
+	 * @param bool   $is_site_transient Optional. Whether this is a site transient. Default false.
+	 * @return string Expiration time string.
+	 */
+	private function get_transient_expiration( $name, $is_site_transient = false ) {
+		if ( $is_site_transient ) {
+			if ( is_multisite() ) {
+				$expiration = (int) get_site_option( '_site_transient_timeout_' . $name );
+			} else {
+				$expiration = (int) get_option( '_site_transient_timeout_' . $name );
+			}
+		} else {
+			$expiration = (int) get_option( '_transient_timeout_' . $name );
+		}
+
+		if ( 0 === $expiration ) {
+			return 'no expiration';
+		}
+
+		$now = time();
+
+		if ( $now > $expiration ) {
+			return 'expired';
+		}
+
+		return human_time_diff( $now, $expiration );
+	}
+
+	/**
 	 * Deletes all expired transients.
 	 */
 	private function delete_expired() {
