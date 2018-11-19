@@ -27,6 +27,29 @@ Feature: Manage WordPress transient cache
       Success: Transient deleted.
       """
 
+  Scenario: List transients
+    Given a WP install
+    And I run `wp transient set foo bar`
+    And I run `wp transient set foo2 bar2 610`
+    And I run `wp transient set foo3 bar3 --network`
+    And I run `wp transient set foo4 bar4 610 --network`
+
+    When I run `wp transient list --format=csv`
+    Then STDOUT should be:
+      """
+      name,value,expiration
+      foo,bar,"no expiration"
+      foo2,bar2,"10 mins"
+      """
+
+    When I run `wp transient list --network --format=csv`
+    Then STDOUT should be:
+      """
+      name,value,expiration
+      foo3,bar3,"no expiration"
+      foo4,bar4,"10 mins"
+      """
+
   Scenario: Network transient CRUD
     Given a WP multisite install
     And I run `wp site create --slug=foo`
@@ -53,6 +76,29 @@ Feature: Manage WordPress transient cache
     Then STDOUT should be:
       """
       Success: Transient deleted.
+      """
+
+  Scenario: List network transients
+    Given a WP multisite install
+    And I run `wp transient set foo bar`
+    And I run `wp transient set foo2 bar2 610`
+    And I run `wp transient set foo3 bar3 --network`
+    And I run `wp transient set foo4 bar4 610 --network`
+
+    When I run `wp transient list --format=csv`
+    Then STDOUT should be:
+      """
+      name,value,expiration
+      foo,bar,"no expiration"
+      foo2,bar2,"10 mins"
+      """
+
+    When I run `wp transient list --network --format=csv`
+    Then STDOUT should be:
+      """
+      name,value,expiration
+      foo3,bar3,"no expiration"
+      foo4,bar4,"10 mins"
       """
 
   Scenario: Transient delete and other flags
