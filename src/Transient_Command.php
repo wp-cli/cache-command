@@ -210,12 +210,13 @@ class Transient_Command extends WP_CLI_Command {
 	 *     Transients are saved to the wp_options table.
 	 */
 	public function type() {
-		global $_wp_using_ext_object_cache, $wpdb;
+		global $wpdb;
 
-		if ( $_wp_using_ext_object_cache )
+		if ( wp_using_ext_object_cache() ) {
 			$message = 'Transients are saved to the object cache.';
-		else
+		} else {
 			$message = 'Transients are saved to the ' . $wpdb->prefix . 'options table.';
+		}
 
 		WP_CLI::line( $message );
 	}
@@ -224,7 +225,7 @@ class Transient_Command extends WP_CLI_Command {
 	 * Deletes all expired transients.
 	 */
 	private function delete_expired() {
-		global $wpdb, $_wp_using_ext_object_cache;
+		global $wpdb;
 
 		// Always delete all transients from DB too.
 		$time = current_time('timestamp');
@@ -242,7 +243,7 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::success( "No expired transients found." );
 		}
 
-		if ( $_wp_using_ext_object_cache ) {
+		if ( wp_using_ext_object_cache() ) {
 			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.');
 		}
 	}
@@ -251,7 +252,7 @@ class Transient_Command extends WP_CLI_Command {
 	 * Deletes all transients.
 	 */
 	private function delete_all() {
-		global $wpdb, $_wp_using_ext_object_cache;
+		global $wpdb;
 
 		// Always delete all transients from DB too.
 		$count = $wpdb->query(
@@ -266,7 +267,7 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::success( "No transients found." );
 		}
 
-		if ( $_wp_using_ext_object_cache ) {
+		if ( wp_using_ext_object_cache() ) {
 			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.');
 		}
 	}
