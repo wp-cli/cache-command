@@ -212,8 +212,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function type() {
 		if ( wp_using_ext_object_cache() ) {
 			$message = 'Transients are saved to the object cache.';
-		else
+		} else {
 			$message = 'Transients are saved to the database.';
+		}
 
 		WP_CLI::line( $message );
 	}
