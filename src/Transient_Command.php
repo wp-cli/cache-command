@@ -199,7 +199,7 @@ class Transient_Command extends WP_CLI_Command {
 	 * Determines the type of transients implementation.
 	 *
 	 * Indicates whether the transients API is using an object cache or the
-	 * options table.
+	 * database.
 	 *
 	 * For a more complete explanation of the transient cache, including the
 	 * network|site cache, please see docs for `wp transient`.
@@ -207,16 +207,13 @@ class Transient_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     $ wp transient type
-	 *     Transients are saved to the wp_options table.
+	 *     Transients are saved to the database.
 	 */
 	public function type() {
-		global $wpdb;
-
 		if ( wp_using_ext_object_cache() ) {
 			$message = 'Transients are saved to the object cache.';
-		} else {
-			$message = 'Transients are saved to the ' . $wpdb->prefix . 'options table.';
-		}
+		else
+			$message = 'Transients are saved to the database.';
 
 		WP_CLI::line( $message );
 	}
