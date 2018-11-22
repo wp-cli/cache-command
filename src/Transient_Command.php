@@ -164,6 +164,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *     # Delete all transients.
 	 *     $ wp transient delete --all
 	 *     Success: 14 transients deleted from the database.
+	 *
+	 *     # Delete all transients in a multsite.
+	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
 	 */
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : NULL;
