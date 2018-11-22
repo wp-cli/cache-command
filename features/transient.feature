@@ -144,7 +144,8 @@ Feature: Manage WordPress transient cache
       bar2
       """
 
-    When I run `wp transient get foo3 --network`
+    # Check if option still exists as a get transient call will remove it.
+    When I run `wp option get _site_transient_foo3`
     Then STDOUT should be:
       """
       bar3
@@ -159,7 +160,7 @@ Feature: Manage WordPress transient cache
     When I run `wp transient delete --expired --network`
     Then STDOUT should be:
       """
-      Success: 1 expired transients deleted from the database.
+      Success: 1 expired transient deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -306,7 +307,8 @@ Feature: Manage WordPress transient cache
       bar2
       """
 
-    When I run `wp transient get foo3 --network`
+    # Check if option still exists as a get transient call will remove it.
+    When I run `wp site option get _site_transient_foo3`
     Then STDOUT should be:
       """
       bar3
@@ -318,7 +320,8 @@ Feature: Manage WordPress transient cache
       bar4
       """
 
-    When I run `wp --url=example.com/foo transient get foo5 --network`
+    # Check if option still exists as a get transient call will remove it.
+    When I run `wp --url=example.com/foo site option get _site_transient_foo5`
     Then STDOUT should be:
       """
       bar5
