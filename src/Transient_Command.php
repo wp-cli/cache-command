@@ -161,9 +161,17 @@ class Transient_Command extends WP_CLI_Command {
 	 *     $ wp transient delete --expired
 	 *     Success: 12 expired transients deleted from the database.
 	 *
+	 *     # Delete expired site transients.
+	 *     $ wp transient delete --expired --network
+	 *     Success: 1 expired transient deleted from the database.
+	 *
 	 *     # Delete all transients.
 	 *     $ wp transient delete --all
 	 *     Success: 14 transients deleted from the database.
+	 *
+	 *     # Delete all site transients.
+	 *     $ wp transient delete --all --network
+	 *     Success: 2 transients deleted from the database.
 	 *
 	 *     # Delete all transients in a multsite.
 	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
