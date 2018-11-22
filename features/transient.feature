@@ -118,15 +118,15 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting expired transients on single site
     Given a WP install
-
-    When I run `wp transient set foo bar 60`
+    And I run `wp transient set foo bar 60`
     And I run `wp transient set foo2 bar2 60`
     And I run `wp transient set foo3 bar3 60 --network`
     And I run `wp transient set foo4 bar4 60 --network`
     # Change timeout to be in the past.
     And I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp option update _site_transient_timeout_foo3 1321009871`
-    And I run `wp transient delete --expired`
+
+    When I run `wp transient delete --expired`
     Then STDOUT should be:
       """
       Success: 1 expired transient deleted from the database.
@@ -278,8 +278,7 @@ Feature: Manage WordPress transient cache
   Scenario: Deleting expired transients on multisite
     Given a WP multisite install
     And I run `wp site create --slug=foo`
-
-    When I run `wp transient set foo bar 60`
+    And I run `wp transient set foo bar 60`
     And I run `wp transient set foo2 bar2 60`
     And I run `wp transient set foo3 bar3 60 --network`
     And I run `wp transient set foo4 bar4 60 --network`
@@ -289,7 +288,8 @@ Feature: Manage WordPress transient cache
     And I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp site option update _site_transient_timeout_foo3 1321009871`
     And I run `wp --url=example.com/foo site option update _site_transient_timeout_foo5 1321009871`
-    And I run `wp transient delete --expired`
+
+    When I run `wp transient delete --expired`
     Then STDOUT should be:
       """
       Success: 1 expired transient deleted from the database.
