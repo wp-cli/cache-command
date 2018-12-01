@@ -245,7 +245,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--network]
 	 * : Get the values of network|site transients. On single site, this is
-	 * is a specially-named cache key. On multisite, this is a global cache
+	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
 	 *
 	 * [--unserialize]
