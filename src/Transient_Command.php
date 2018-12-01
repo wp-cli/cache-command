@@ -237,6 +237,12 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
+	 * [--search=<pattern>]
+	 * : Use wildcards ( * and ? ) to match transient name.
+	 *
+	 * [--exclude=<pattern>]
+	 * : Pattern to exclude. Use wildcards ( * and ? ) to match transient name.
+	 *
 	 * [--network]
 	 * : Get the values of network|site transients. On single site, this is
 	 * is a specially-named cache key. On multisite, this is a global cache
@@ -245,11 +251,11 @@ class Transient_Command extends WP_CLI_Command {
 	 * [--unserialize]
 	 * : Unserialize transient values in output.
 	 *
-	 * [--fields=<fields>]
-	 * : Limit the output to specific object fields.
-	 *
 	 * [--human-readable]
 	 * : Human-readable output for expirations.
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific object fields.
 	 *
 	 * [--format=<format>]
 	 * : The serialization format for the value.
@@ -289,35 +295,89 @@ class Transient_Command extends WP_CLI_Command {
 	public function _list( $args, $assoc_args ) {
 		global $wpdb;
 
-		$network        = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network', false );
-		$unserialize    = \WP_CLI\Utils\get_flag_value( $assoc_args, 'unserialize', false );
-		$human_readable = \WP_CLI\Utils\get_flag_value( $assoc_args, 'human-readable', false );
+		$network        = Utils\get_flag_value( $assoc_args, 'network', false );
+		$unserialize    = Utils\get_flag_value( $assoc_args, 'unserialize', false );
+		$human_readable = Utils\get_flag_value( $assoc_args, 'human-readable', false );
 
 		$fields = array( 'name', 'value', 'expiration' );
 		if ( isset( $assoc_args['fields'] ) ) {
 			$fields = explode( ',', $assoc_args['fields'] );
 		}
 
+		$pattern = '%';
+		$exclude = '';
+		if ( isset( $assoc_args['search'] ) ) {
+			$pattern = Utils\esc_like( $assoc_args['search'] );
+			// Substitute wildcards.
+			$pattern = str_replace(
+				array( '*', '?' ),
+				array( '%', '_' ),
+				$pattern
+			);
+		}
+		if ( isset( $assoc_args['exclude'] ) ) {
+			$exclude = Utils\esc_like( $assoc_args['exclude'] );
+			// Substitute wildcards.
+			$exclude = str_replace(
+				array( '*', '?' ),
+				array( '%', '_' ),
+				$exclude
+			);
+		}
+
 		if ( $network ) {
 			if ( is_multisite() ) {
-				$query = $wpdb->prepare(
-					"SELECT `meta_key` as `name`, `meta_value` as `value` FROM {$wpdb->sitemeta} WHERE meta_key LIKE %s AND meta_key NOT LIKE %s",
-					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
-					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				$where  = $wpdb->prepare(
+					'WHERE `meta_key` LIKE %s',
+					Utils\esc_like( '_site_transient_' ) . $pattern
 				);
+				$where .= $wpdb->prepare(
+					' AND meta_key NOT LIKE %s',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				);
+				if ( $exclude ) {
+					$where .= $wpdb->prepare(
+						' AND meta_key NOT LIKE %s',
+						Utils\esc_like( '_site_transient_' ) . $exclude
+					);
+				}
+
+				$query = "SELECT `meta_key` as `name`, `meta_value` as `value` FROM {$wpdb->sitemeta} {$where}";
 			} else {
-				$query = $wpdb->prepare(
-					"SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
-					\WP_CLI\Utils\esc_like( '_site_transient_' ) . '%',
-					\WP_CLI\Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				$where  = $wpdb->prepare(
+					'WHERE `option_name` LIKE %s',
+					Utils\esc_like( '_site_transient_' ) . $pattern
 				);
+				$where .= $wpdb->prepare(
+					' AND option_name NOT LIKE %s',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				);
+				if ( $exclude ) {
+					$where .= $wpdb->prepare(
+						' AND option_name NOT LIKE %s',
+						Utils\esc_like( '_site_transient_' ) . $exclude
+					);
+				}
+
+				$query = "SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} {$where}";
 			}
 		} else {
-			$query = $wpdb->prepare(
-				"SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
-				\WP_CLI\Utils\esc_like( '_transient_' ) . '%',
-				\WP_CLI\Utils\esc_like( '_transient_timeout_' ) . '%'
+			$where  = $wpdb->prepare(
+				'WHERE `option_name` LIKE %s',
+				Utils\esc_like( '_transient_' ) . $pattern
 			);
+			$where .= $wpdb->prepare(
+				' AND option_name NOT LIKE %s',
+				Utils\esc_like( '_transient_timeout_' ) . '%'
+			);
+			if ( $exclude ) {
+				$where .= $wpdb->prepare(
+					' AND option_name NOT LIKE %s',
+					Utils\esc_like( '_transient_' ) . $exclude
+				);
+			}
+
+			$query = "SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} {$where}";
 		}
 
 		$results = $wpdb->get_results( $query );
