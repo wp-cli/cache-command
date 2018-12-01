@@ -248,6 +248,9 @@ class Transient_Command extends WP_CLI_Command {
 	 * [--fields=<fields>]
 	 * : Limit the output to specific object fields.
 	 *
+	 * [--human-readable]
+	 * : Human-readable output for expirations.
+	 *
 	 * [--format=<format>]
 	 * : The serialization format for the value.
 	 * ---
@@ -286,10 +289,11 @@ class Transient_Command extends WP_CLI_Command {
 	public function _list( $args, $assoc_args ) {
 		global $wpdb;
 
-		$fields      = array( 'name', 'value', 'expiration' );
-		$network     = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network', false );
-		$unserialize = \WP_CLI\Utils\get_flag_value( $assoc_args, 'unserialize', false );
+		$network        = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network', false );
+		$unserialize    = \WP_CLI\Utils\get_flag_value( $assoc_args, 'unserialize', false );
+		$human_readable = \WP_CLI\Utils\get_flag_value( $assoc_args, 'human-readable', false );
 
+		$fields = array( 'name', 'value', 'expiration' );
 		if ( isset( $assoc_args['fields'] ) ) {
 			$fields = explode( ',', $assoc_args['fields'] );
 		}
@@ -320,7 +324,7 @@ class Transient_Command extends WP_CLI_Command {
 
 		foreach ( $results as $result ) {
 			$result->name       = str_replace( array( '_site_transient_', '_transient_' ), '', $result->name );
-			$result->expiration = $this->get_transient_expiration( $result->name, $network );
+			$result->expiration = $this->get_transient_expiration( $result->name, $network, $human_readable );
 
 			if ( $unserialize ) {
 				$result->value = maybe_unserialize( $result->value );
@@ -335,13 +339,15 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Retrieves the human-friendly expiration time.
+	 * Retrieves the expiration time.
 	 *
 	 * @param string $name              Transient name.
 	 * @param bool   $is_site_transient Optional. Whether this is a site transient. Default false.
+	 * @param bool   $human_readable    Optional. Whether to return the difference between now and the
+	 *                                  expiration time in a human-readable format. Default false.
 	 * @return string Expiration time string.
 	 */
-	private function get_transient_expiration( $name, $is_site_transient = false ) {
+	private function get_transient_expiration( $name, $is_site_transient = false, $human_readable = false ) {
 		if ( $is_site_transient ) {
 			if ( is_multisite() ) {
 				$expiration = (int) get_site_option( '_site_transient_timeout_' . $name );
@@ -353,7 +359,11 @@ class Transient_Command extends WP_CLI_Command {
 		}
 
 		if ( 0 === $expiration ) {
-			return 'no expiration';
+			return $human_readable ? 'never expires' : 'false';
+		}
+
+		if ( ! $human_readable ) {
+			return $expiration;
 		}
 
 		$now = time();
