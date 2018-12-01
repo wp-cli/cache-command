@@ -1,5 +1,7 @@
 <?php
 
+use WP_CLI\Utils;
+
 /**
  * Adds, gets, and deletes entries in the WordPress Transient Cache.
  *
@@ -74,7 +76,7 @@ class Transient_Command extends WP_CLI_Command {
 	public function get( $args, $assoc_args ) {
 		list( $key ) = $args;
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+		$func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$value = $func( $key );
 
 		if ( false === $value ) {
@@ -117,9 +119,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function set( $args, $assoc_args ) {
 		list( $key, $value ) = $args;
 
-		$expiration = \WP_CLI\Utils\get_flag_value( $args, 2, 0 );
+		$expiration = Utils\get_flag_value( $args, 2, 0 );
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
+		$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
 		if ( $func( $key, $value, $expiration ) ) {
 			WP_CLI::success( 'Transient added.' );
 		} else {
@@ -159,22 +161,33 @@ class Transient_Command extends WP_CLI_Command {
 	 *     $ wp transient delete --expired
 	 *     Success: 12 expired transients deleted from the database.
 	 *
+	 *     # Delete expired site transients.
+	 *     $ wp transient delete --expired --network
+	 *     Success: 1 expired transient deleted from the database.
+	 *
 	 *     # Delete all transients.
 	 *     $ wp transient delete --all
 	 *     Success: 14 transients deleted from the database.
+	 *
+	 *     # Delete all site transients.
+	 *     $ wp transient delete --all --network
+	 *     Success: 2 transients deleted from the database.
+	 *
+	 *     # Delete all transients in a multsite.
+	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
 	 */
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : NULL;
 
-		$all = \WP_CLI\Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = \WP_CLI\Utils\get_flag_value( $assoc_args, 'expired' );
+		$all     = Utils\get_flag_value( $assoc_args, 'all' );
+		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
+		$network = Utils\get_flag_value( $assoc_args, 'network' );
 
 		if ( true === $all ) {
-			$this->delete_all();
+			$this->delete_all( $network );
 			return;
-		}
-		else if ( true === $expired ) {
-			$this->delete_expired();
+		} elseif ( true === $expired ) {
+			$this->delete_expired( $network );
 			return;
 		}
 
@@ -182,12 +195,12 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::error( 'Please specify transient key, or use --all or --expired.' );
 		}
 
-		$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'delete_site_transient' : 'delete_transient';
+		$func = $network ? 'delete_site_transient' : 'delete_transient';
 
 		if ( $func( $key ) ) {
 			WP_CLI::success( 'Transient deleted.' );
 		} else {
-			$func = \WP_CLI\Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+			$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 			if ( $func( $key ) )
 				WP_CLI::error( 'Transient was not deleted even though the transient appears to exist.' );
 			else
@@ -199,7 +212,7 @@ class Transient_Command extends WP_CLI_Command {
 	 * Determines the type of transients implementation.
 	 *
 	 * Indicates whether the transients API is using an object cache or the
-	 * options table.
+	 * database.
 	 *
 	 * For a more complete explanation of the transient cache, including the
 	 * network|site cache, please see docs for `wp transient`.
@@ -207,15 +220,14 @@ class Transient_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     $ wp transient type
-	 *     Transients are saved to the wp_options table.
+	 *     Transients are saved to the database.
 	 */
 	public function type() {
-		global $_wp_using_ext_object_cache, $wpdb;
-
-		if ( $_wp_using_ext_object_cache )
+		if ( wp_using_ext_object_cache() ) {
 			$message = 'Transients are saved to the object cache.';
-		else
-			$message = 'Transients are saved to the ' . $wpdb->prefix . 'options table.';
+		} else {
+			$message = 'Transients are saved to the database.';
+		}
 
 		WP_CLI::line( $message );
 	}
@@ -355,53 +367,176 @@ class Transient_Command extends WP_CLI_Command {
 
 	/**
 	 * Deletes all expired transients.
+	 *
+	 * Only deletes the expired transients from the database.
+	 *
+	 * @param bool $network Whether to delete transients or network|site transients.
 	 */
-	private function delete_expired() {
-		global $wpdb, $_wp_using_ext_object_cache;
+	private function delete_expired( $network ) {
+		global $wpdb;
 
-		// Always delete all transients from DB too.
-		$time = current_time('timestamp');
-		$count = $wpdb->query(
-			"DELETE a, b FROM $wpdb->options a, $wpdb->options b WHERE
-			a.option_name LIKE '\_transient\_%' AND
-			a.option_name NOT LIKE '\_transient\_timeout\_%' AND
-			b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
-			AND b.option_value < $time"
-		);
+		$count = 0;
 
-		if ( $count > 0 ) {
-			WP_CLI::success( "$count expired transients deleted from the database." );
+		if ( ! $network ) {
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
+						AND b.option_value < %d",
+					Utils\esc_like( '_transient_' ) . '%',
+					Utils\esc_like( '_transient_timeout_' ) . '%',
+					time()
+				)
+			);
 		} else {
-			WP_CLI::success( "No expired transients found." );
+			if ( ! is_multisite() ) {
+				// Non-Multisite stores site transients in the options table.
+				$count += $wpdb->query(
+					$wpdb->prepare(
+						"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+							WHERE a.option_name LIKE %s
+							AND a.option_name NOT LIKE %s
+							AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
+							AND b.option_value < %d",
+						Utils\esc_like( '_site_transient_' ) . '%',
+						Utils\esc_like( '_site_transient_timeout_' ) . '%',
+						time()
+					)
+				);
+			} else {
+				// Multisite stores site transients in the sitemeta table.
+				$count += $wpdb->query(
+					$wpdb->prepare(
+						"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+							WHERE a.meta_key LIKE %s
+							AND a.meta_key NOT LIKE %s
+							AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
+							AND b.meta_value < %d",
+						Utils\esc_like( '_site_transient_' ) . '%',
+						Utils\esc_like( '_site_transient_timeout_' ) . '%',
+						time()
+					)
+				);
+			}
 		}
 
-		if ( $_wp_using_ext_object_cache ) {
-			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.');
+		// The above queries delete the transient and the transient timeout
+		// thus each transient is counted twice.
+		$count = $count / 2;
+
+		if ( $count > 0 ) {
+			WP_CLI::success(
+				sprintf(
+					'%d expired %s deleted from the database.',
+					$count,
+					Utils\pluralize( 'transient', $count )
+				)
+			);
+		} else {
+			WP_CLI::success( 'No expired transients found.' );
+		}
+
+		if ( wp_using_ext_object_cache() ) {
+			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.' );
 		}
 	}
 
 	/**
 	 * Deletes all transients.
+	 *
+	 * Only deletes the transients from the database.
+	 *
+	 * @param bool $network Whether to delete transients or network|site transients.
 	 */
-	private function delete_all() {
-		global $wpdb, $_wp_using_ext_object_cache;
+	private function delete_all( $network ) {
+		global $wpdb;
 
-		// Always delete all transients from DB too.
-		$count = $wpdb->query(
-			"DELETE FROM $wpdb->options
-			WHERE option_name LIKE '\_transient\_%'
-			OR option_name LIKE '\_site\_transient\_%'"
-		);
+		// To ensure proper count values we first delete all transients with a timeout
+		// and then the remaining transients without a timeout.
+		$count = 0;
+
+		if ( ! $network ) {
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+						WHERE a.option_name LIKE %s
+						AND a.option_name NOT LIKE %s
+						AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )",
+					Utils\esc_like( '_transient_' ) . '%',
+					Utils\esc_like( '_transient_timeout_' ) . '%'
+				)
+			);
+
+			$count += $deleted / 2; // Ignore affected rows for timeouts.
+
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+					Utils\esc_like( '_transient_' ) . '%'
+				)
+			);
+		} else {
+			if ( ! is_multisite() ) {
+				// Non-Multisite stores site transients in the options table.
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+							WHERE a.option_name LIKE %s
+							AND a.option_name NOT LIKE %s
+							AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )",
+						Utils\esc_like( '_site_transient_' ) . '%',
+						Utils\esc_like( '_site_transient_timeout_' ) . '%'
+					)
+				);
+
+				$count += $deleted / 2; // Ignore affected rows for timeouts.
+
+				$count += $wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+						Utils\esc_like( '_site_transient_' ) . '%'
+					)
+				);
+			} else {
+				// Multisite stores site transients in the sitemeta table.
+				$deleted = $wpdb->query(
+					$wpdb->prepare(
+						"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+							WHERE a.meta_key LIKE %s
+							AND a.meta_key NOT LIKE %s
+							AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )",
+						Utils\esc_like( '_site_transient_' ) . '%',
+						Utils\esc_like( '_site_transient_timeout_' ) . '%'
+					)
+				);
+
+				$count += $deleted / 2; // Ignore affected rows for timeouts.
+
+				$count += $wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM $wpdb->sitemeta WHERE meta_key LIKE %s",
+						Utils\esc_like( '_site_transient_' ) . '%'
+					)
+				);
+			}
+		}
 
 		if ( $count > 0 ) {
-			WP_CLI::success( "$count transients deleted from the database." );
+			WP_CLI::success(
+				sprintf(
+					'%d %s deleted from the database.',
+					$count,
+					Utils\pluralize( 'transient', $count )
+				)
+			);
 		} else {
-			WP_CLI::success( "No transients found." );
+			WP_CLI::success( 'No transients found.' );
 		}
 
-		if ( $_wp_using_ext_object_cache ) {
-			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.');
+		if ( wp_using_ext_object_cache() ) {
+			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.' );
 		}
 	}
-
 }
