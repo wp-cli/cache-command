@@ -379,44 +379,88 @@ Feature: Manage WordPress transient cache
       Given a WP install
       And I run `wp transient set foo bar`
       And I run `wp transient set foo2 bar2 610`
-      And I run `wp transient set foo3 bar3 --network`
-      And I run `wp transient set foo4 bar4 610 --network`
+      And I run `wp option update _transient_timeout_foo2 95649119999`
+      And I run `wp transient set foo3 bar3 300`
+      And I run `wp option update _transient_timeout_foo3 1321009871`
+      And I run `wp transient set foo4 bar4 --network`
+      And I run `wp transient set foo5 bar5 610 --network`
+      And I run `wp option update _site_transient_timeout_foo5 95649119999`
+      And I run `wp transient set foo6 bar6 300 --network`
+      And I run `wp option update _site_transient_timeout_foo6 1321009871`
 
       When I run `wp transient list --format=csv`
       Then STDOUT should be:
         """
         name,value,expiration
-        foo,bar,"no expiration"
-        foo2,bar2,"10 mins"
+        foo,bar,false
+        foo2,bar2,95649119999
+        foo3,bar3,1321009871
+        """
+
+      When I run `wp transient list --format=csv --human-readable`
+      Then STDOUT should contain:
+        """
+        foo,bar,"never expires"
+        """
+      And STDOUT should contain:
+        """
+        foo3,bar3,expired
+        """
+      And STDOUT should not contain:
+        """
+        foo2,bar2,95649119999
         """
 
       When I run `wp transient list --network --format=csv`
       Then STDOUT should be:
         """
         name,value,expiration
-        foo3,bar3,"no expiration"
-        foo4,bar4,"10 mins"
+        foo4,bar4,false
+        foo5,bar5,95649119999
+        foo6,bar6,1321009871
         """
 
     Scenario: List transients on multisite
       Given a WP multisite install
       And I run `wp transient set foo bar`
       And I run `wp transient set foo2 bar2 610`
-      And I run `wp transient set foo3 bar3 --network`
-      And I run `wp transient set foo4 bar4 610 --network`
+      And I run `wp option update _transient_timeout_foo2 95649119999`
+      And I run `wp transient set foo3 bar3 300`
+      And I run `wp option update _transient_timeout_foo3 1321009871`
+      And I run `wp transient set foo4 bar4 --network`
+      And I run `wp transient set foo5 bar5 610 --network`
+      And I run `wp site option update _site_transient_timeout_foo5 95649119999`
+      And I run `wp transient set foo6 bar6 300 --network`
+      And I run `wp site option update _site_transient_timeout_foo6 1321009871`
 
       When I run `wp transient list --format=csv`
       Then STDOUT should be:
         """
         name,value,expiration
-        foo,bar,"no expiration"
-        foo2,bar2,"10 mins"
+        foo,bar,false
+        foo2,bar2,95649119999
+        foo3,bar3,1321009871
+        """
+
+      When I run `wp transient list --format=csv --human-readable`
+      Then STDOUT should contain:
+        """
+        foo,bar,"never expires"
+        """
+      And STDOUT should contain:
+        """
+        foo3,bar3,expired
+        """
+      And STDOUT should not contain:
+        """
+        foo2,bar2,95649119999
         """
 
       When I run `wp transient list --network --format=csv`
       Then STDOUT should be:
         """
         name,value,expiration
-        foo3,bar3,"no expiration"
-        foo4,bar4,"10 mins"
+        foo4,bar4,false
+        foo5,bar5,95649119999
+        foo6,bar6,1321009871
         """
