@@ -292,7 +292,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * @subcommand list
 	 */
-	public function _list( $args, $assoc_args ) {
+	public function list_( $args, $assoc_args ) {
 		global $wpdb;
 
 		$network        = Utils\get_flag_value( $assoc_args, 'network', false );
