@@ -42,7 +42,8 @@
             "transient delete",
             "transient get",
             "transient set",
-            "transient type"
+            "transient type",
+            "transient list"
         ]
     },
     "autoload": {
