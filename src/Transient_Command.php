@@ -381,6 +381,7 @@ class Transient_Command extends WP_CLI_Command {
 			$query = "SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} {$where}";
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared properly above.
 		$results = $wpdb->get_results( $query );
 
 		foreach ( $results as $result ) {
