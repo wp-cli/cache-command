@@ -177,7 +177,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
 	 */
 	public function delete( $args, $assoc_args ) {
-		$key = ( ! empty( $args ) ) ? $args[0] : NULL;
+		$key = ( ! empty( $args ) ) ? $args[0] : null;
 
 		$all     = Utils\get_flag_value( $assoc_args, 'all' );
 		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
@@ -201,10 +201,11 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::success( 'Transient deleted.' );
 		} else {
 			$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
-			if ( $func( $key ) )
+			if ( $func( $key ) ) {
 				WP_CLI::error( 'Transient was not deleted even though the transient appears to exist.' );
-			else
+			} else {
 				WP_CLI::warning( 'Transient was not deleted; however, the transient does not appear to exist.' );
+			}
 		}
 	}
 
@@ -380,6 +381,7 @@ class Transient_Command extends WP_CLI_Command {
 			$query = "SELECT `option_name` as `name`, `option_value` as `value` FROM {$wpdb->options} {$where}";
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared properly above.
 		$results = $wpdb->get_results( $query );
 
 		foreach ( $results as $result ) {
