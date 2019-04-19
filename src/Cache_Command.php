@@ -129,7 +129,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function delete( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
-		$result = wp_cache_delete( $key, $group );
+		$result              = wp_cache_delete( $key, $group );
 
 		if ( false === $result ) {
 			WP_CLI::error( 'The object was not deleted.' );
@@ -188,7 +188,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
-		$value = wp_cache_get( $key, $group );
+		$value               = wp_cache_get( $key, $group );
 
 		if ( false === $value ) {
 			WP_CLI::error( "Object with key '$key' and group '$group' not found." );
