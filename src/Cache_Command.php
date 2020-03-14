@@ -129,7 +129,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function delete( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
-		$result = wp_cache_delete( $key, $group );
+		$result              = wp_cache_delete( $key, $group );
 
 		if ( false === $result ) {
 			WP_CLI::error( 'The object was not deleted.' );
@@ -191,7 +191,6 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
-
 		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {

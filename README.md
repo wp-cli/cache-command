@@ -403,9 +403,20 @@ network|site cache, please see docs for `wp transient`.
     $ wp transient delete --expired
     Success: 12 expired transients deleted from the database.
 
+    # Delete expired site transients.
+    $ wp transient delete --expired --network
+    Success: 1 expired transient deleted from the database.
+
     # Delete all transients.
     $ wp transient delete --all
     Success: 14 transients deleted from the database.
+
+    # Delete all site transients.
+    $ wp transient delete --all --network
+    Success: 2 transients deleted from the database.
+
+    # Delete all transients in a multsite.
+    $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
 
 
 
@@ -496,7 +507,7 @@ wp transient type
 ~~~
 
 Indicates whether the transients API is using an object cache or the
-options table.
+database.
 
 For a more complete explanation of the transient cache, including the
 network|site cache, please see docs for `wp transient`.
@@ -504,7 +515,72 @@ network|site cache, please see docs for `wp transient`.
 **EXAMPLES**
 
     $ wp transient type
-    Transients are saved to the wp_options table.
+    Transients are saved to the database.
+
+
+
+### wp transient list
+
+Lists transients and their values.
+
+~~~
+wp transient list [--search=<pattern>] [--exclude=<pattern>] [--network] [--unserialize] [--human-readable] [--fields=<fields>] [--format=<format>]
+~~~
+
+**OPTIONS**
+
+	[--search=<pattern>]
+		Use wildcards ( * and ? ) to match transient name.
+
+	[--exclude=<pattern>]
+		Pattern to exclude. Use wildcards ( * and ? ) to match transient name.
+
+	[--network]
+		Get the values of network|site transients. On single site, this is
+		a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
+
+	[--unserialize]
+		Unserialize transient values in output.
+
+	[--human-readable]
+		Human-readable output for expirations.
+
+	[--fields=<fields>]
+		Limit the output to specific object fields.
+
+	[--format=<format>]
+		The serialization format for the value.
+		---
+		default: table
+		options:
+		  - table
+		  - json
+		  - csv
+		  - count
+		  - yaml
+		---
+
+**AVAILABLE FIELDS**
+
+This field will be displayed by default for each matching option:
+
+* name
+* value
+* expiration
+
+**EXAMPLES**
+
+    # List all transients
+    $ wp transient list
+     +------+-------+---------------+
+     | name | value | expiration    |
+     +------+-------+---------------+
+     | foo  | bar   | 39 mins       |
+     | foo2 | bar2  | no expiration |
+     | foo3 | bar2  | expired       |
+     | foo4 | bar4  | 4 hours       |
+     +------+-------+---------------+
 
 ## Installing
 

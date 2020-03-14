@@ -2,7 +2,7 @@ sudo: false
 dist: trusty
 
 language: php
-php: 7.2
+php: 7.3
 
 notifications:
   email:
@@ -51,6 +51,12 @@ jobs:
         - composer phpcs
       env: BUILD=sniff
     - stage: test
+      php: 7.4snapshot
+      env: WP_VERSION=latest
+    - stage: test
+      php: 7.3
+      env: WP_VERSION=latest
+    - stage: test
       php: 7.2
       env: WP_VERSION=latest
     - stage: test
@@ -71,4 +77,8 @@ jobs:
     - stage: test
       php: 5.4
       dist: precise
+      env: WP_VERSION=5.1
+  allow_failures:
+    - stage: test
+      php: 7.4snapshot
       env: WP_VERSION=latest
