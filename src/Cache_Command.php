@@ -62,7 +62,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function add( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -109,7 +109,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function decr( $args, $assoc_args ) {
 		list( $key, $offset, $group ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -152,7 +152,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -221,7 +221,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function get( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -270,7 +270,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function incr( $args, $assoc_args ) {
 		list( $key, $offset, $group ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -322,7 +322,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function replace( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
 
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
@@ -373,7 +373,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function set( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
-		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', '' );
+		$global = \WP_CLI\Utils\get_flag_value( $assoc_args, 'global', false );
 
 		if ( $global && function_exists( 'wp_cache_add_global_groups' ) ) {
 			wp_cache_add_global_groups( array( $group ) );
