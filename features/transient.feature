@@ -57,6 +57,10 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting all transients on single site
     Given a WP install
+    And I run `wp transient list --format=count`
+    And save STDOUT as {EXISTING_TRANSIENTS}
+    And I run `expr {EXISTING_TRANSIENTS} + 2`
+    And save STDOUT as {EXPECTED_TRANSIENTS}
 
     When I try `wp transient delete`
     Then STDERR should be:
@@ -71,7 +75,7 @@ Feature: Manage WordPress transient cache
     And I run `wp transient delete --all`
     Then STDOUT should be:
       """
-      Success: 2 transients deleted from the database.
+      Success: {EXPECTED_TRANSIENTS} transients deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -190,6 +194,10 @@ Feature: Manage WordPress transient cache
   Scenario: Deleting all transients on multisite
     Given a WP multisite install
     And I run `wp site create --slug=foo`
+    And I run `wp transient list --format=count`
+    And save STDOUT as {EXISTING_TRANSIENTS}
+    And I run `expr {EXISTING_TRANSIENTS} + 2`
+    And save STDOUT as {EXPECTED_TRANSIENTS}
 
     When I try `wp transient delete`
     Then STDERR should be:
@@ -206,7 +214,7 @@ Feature: Manage WordPress transient cache
     And I run `wp transient delete --all`
     Then STDOUT should be:
       """
-      Success: 2 transients deleted from the database.
+      Success: {EXPECTED_TRANSIENTS} transients deleted from the database.
       """
 
     When I try `wp transient get foo`
@@ -389,7 +397,7 @@ Feature: Manage WordPress transient cache
     And I run `wp option update _site_transient_timeout_foo6 1321009871`
 
     When I run `wp transient list --format=csv`
-    Then STDOUT should be:
+    Then STDOUT should contain:
       """
       name,value,expiration
       foo,bar,false
@@ -434,7 +442,7 @@ Feature: Manage WordPress transient cache
     And I run `wp site option update _site_transient_timeout_foo6 1321009871`
 
     When I run `wp transient list --format=csv`
-    Then STDOUT should be:
+    Then STDOUT should contain:
       """
       name,value,expiration
       foo,bar,false
