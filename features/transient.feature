@@ -57,6 +57,10 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting all transients on single site
     Given a WP install
+    And I run `wp transient list --format=count`
+    And save STDOUT as {EXISTING_TRANSIENTS}
+    And I run `expr {EXISTING_TRANSIENTS} + 2`
+    And save STDOUT as {EXPECTED_TRANSIENTS}
 
     When I try `wp transient delete`
     Then STDERR should be:
@@ -71,7 +75,7 @@ Feature: Manage WordPress transient cache
     And I run `wp transient delete --all`
     Then STDOUT should be:
       """
-      Success: 2 transients deleted from the database.
+      Success: {EXPECTED_TRANSIENTS} transients deleted from the database.
       """
 
     When I try `wp transient get foo`
