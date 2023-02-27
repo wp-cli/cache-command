@@ -296,6 +296,10 @@ class Transient_Command extends WP_CLI_Command {
 	public function list_( $args, $assoc_args ) {
 		global $wpdb;
 
+		if ( wp_using_ext_object_cache() ) {
+			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only shows those stored in the database.' );
+		}
+
 		$network        = Utils\get_flag_value( $assoc_args, 'network', false );
 		$unserialize    = Utils\get_flag_value( $assoc_args, 'unserialize', false );
 		$human_readable = Utils\get_flag_value( $assoc_args, 'human-readable', false );
