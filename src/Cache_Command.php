@@ -361,7 +361,12 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function supports( $args, $assoc_args ) {
 		list ( $feature ) = $args;
-		$supports         = wp_cache_supports( $feature );
+
+		if ( ! function_exists( 'wp_cache_supports' ) ) {
+			WP_CLI::error( 'Checking cache features is only available in WordPress 6.1 and higher' );
+		}
+
+		$supports = wp_cache_supports( $feature );
 
 		if ( $supports ) {
 			WP_CLI::halt( 0 );
