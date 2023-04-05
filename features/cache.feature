@@ -132,3 +132,17 @@ Feature: Managed the WordPress object cache
       """
       Error: Could not replace object 'bar' in group 'foo'. Does it not exist?
       """
+  Scenario: Flushing cache on a multisite installation
+    Given a WP multisite installation
+
+    When I try `wp cache flush`
+    Then STDERR should not contain:
+      """
+      Warning: You are using a multisite installation. Flushing the cache will flush the cache for all sites.
+      """
+
+    When I try `wp cache flush --url=example.com`
+    Then STDERR should contain:
+      """
+      Warning: You are using a multisite installation. Flushing the cache will flush the cache for all sites.
+      """
