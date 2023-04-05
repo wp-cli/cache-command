@@ -132,3 +132,20 @@ Feature: Managed the WordPress object cache
       """
       Error: Could not replace object 'bar' in group 'foo'. Does it not exist?
       """
+
+    When I run `wp cache clear-group add_multiple`
+    Then STDOUT should be:
+      """
+      Success: Cache group 'add_multiple' was flushed.
+      """
+
+    When I try `wp cache clear-group non_existing`
+    Then STDERR should be:
+      """
+      Error: Cache group 'non_existing' is not supported.
+      """
+    When I try `wp cache clear-group false_return`
+    Then STDERR should be:
+      """
+      Warning: Cache group 'false_return' was not be flushed.
+      """

@@ -339,4 +339,32 @@ class Cache_Command extends WP_CLI_Command {
 		WP_CLI::line( $message );
 	}
 
+	/**
+	 * Removes all cache items in a group, if the object cache implementation supports it.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <group>
+	 * : Cache group key.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear cache group.
+	 *     $ wp cache clear-group my_group
+	 *
+	 * @subcommand clear-group
+	 */
+	public function clear_group( $args, $assoc_args ) {
+		list( $group ) = $args;
+
+		if (! wp_cache_supports( 'flush_group' )) {
+			WP_CLI::error( "Group flushing is not supported." );
+		}
+
+		if ( ! wp_cache_flush_group( $group ) ) {
+			WP_CLI::warning("Cache group '$group' was not be flushed." );
+		}
+		WP_CLI::success( "Cache group '$group' was flushed." );
+	}
+
 }
