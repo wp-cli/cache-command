@@ -132,3 +132,9 @@ Feature: Managed the WordPress object cache
       """
       Error: Could not replace object 'bar' in group 'foo'. Does it not exist?
       """
+
+    When I try `wp cache supports non_existing`
+    Then the return code should be 1
+
+    When I try `wp cache supports set_multiple`
+    Then the return code should be 0
