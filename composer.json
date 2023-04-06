@@ -41,6 +41,7 @@
             "cache incr",
             "cache replace",
             "cache set",
+            "cache supports",
             "cache type",
             "transient",
             "transient delete",

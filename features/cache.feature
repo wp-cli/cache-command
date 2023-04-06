@@ -147,3 +147,13 @@ Feature: Managed the WordPress object cache
       """
       Warning: Ignoring the --url=<url> argument because flushing the cache affects all sites on a multisite installation.
       """
+
+  @require-wp-6.1
+  Scenario: Checking if the cache supports a feature
+    Given a WP install
+
+    When I try `wp cache supports non_existing`
+    Then the return code should be 1
+
+    When I run `wp cache supports set_multiple`
+    Then the return code should be 0
