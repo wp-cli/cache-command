@@ -155,5 +155,5 @@ Feature: Managed the WordPress object cache
     When I try `wp cache supports non_existing`
     Then the return code should be 1
 
-    When I try `wp cache supports set_multiple`
+    When I run `wp cache supports set_multiple`
     Then the return code should be 0
