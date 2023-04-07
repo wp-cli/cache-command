@@ -351,22 +351,19 @@ class Cache_Command extends WP_CLI_Command {
 	 *
 	 *     # Clear cache group.
 	 *     $ wp cache clear-group my_group
+	 *     Success: Cache group 'my_group' was flushed.
 	 *
 	 * @subcommand clear-group
 	 */
 	public function clear_group( $args, $assoc_args ) {
 		list( $group ) = $args;
 
-		if ( ! function_exists( 'wp_cache_supports' ) ) {
-			WP_CLI::error( 'Checking cache features is only available in WordPress 6.1 and higher' );
-		}
-
-		if ( ! wp_cache_supports( 'flush_group' ) ) {
+		if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
 			WP_CLI::error( 'Group flushing is not supported.' );
 		}
 
 		if ( ! wp_cache_flush_group( $group ) ) {
-			WP_CLI::warning( "Cache group '$group' was not be flushed." );
+			WP_CLI::error( "Cache group '$group' was not flushed." );
 		}
 		WP_CLI::success( "Cache group '$group' was flushed." );
 	}

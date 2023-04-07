@@ -144,6 +144,7 @@ Feature: Managed the WordPress object cache
       """
       Error: Cache group 'non_existing' is not supported.
       """
+
     When I try `wp cache clear-group false_return`
     Then STDERR should be:
       """
