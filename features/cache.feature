@@ -139,16 +139,25 @@ Feature: Managed the WordPress object cache
       Success: Cache group 'add_multiple' was flushed.
       """
 
-    When I try `wp cache clear-group non_existing`
+  Scenario: Some cache groups cannot be cleared.
+    Given a WP install
+    And a wp-content/mu-plugins/unclearable-test-cache.php file:
+      """php
+      <?php
+      class Dummy_Object_Cache extends WP_Object_Cache {
+        public function flush_group( $group ) {
+          if ( $group === 'permanent_root_cache' ) {
+            return false;
+          }
+          return parent::flush_group( $group );
+        }
+      }
+      $GLOBALS['wp_object_cache'] = new Dummy_Object_Cache();
+      """
+    When I try `wp cache clear-group permanent_root_cache`
     Then STDERR should be:
       """
-      Error: Cache group 'non_existing' is not supported.
-      """
-
-    When I try `wp cache clear-group false_return`
-    Then STDERR should be:
-      """
-      Warning: Cache group 'false_return' was not be flushed.
+      Error: Cache group 'permanent_root_cache' was not flushed.
       """
 
   Scenario: Flushing cache on a multisite installation
