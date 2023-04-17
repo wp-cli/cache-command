@@ -155,8 +155,12 @@ class Cache_Command extends WP_CLI_Command {
 	 *     Success: The cache was flushed.
 	 */
 	public function flush( $args, $assoc_args ) {
-		$value = wp_cache_flush();
 
+		if ( WP_CLI::has_config( 'url' ) && ! empty( WP_CLI::get_config()['url'] ) && is_multisite() ) {
+			WP_CLI::warning( 'Ignoring the --url=<url> argument because flushing the cache affects all sites on a multisite installation.' );
+		}
+
+		$value = wp_cache_flush();
 		if ( false === $value ) {
 			WP_CLI::error( 'The object cache could not be flushed.' );
 		}
@@ -337,6 +341,41 @@ class Cache_Command extends WP_CLI_Command {
 	public function type( $args, $assoc_args ) {
 		$message = WP_CLI\Utils\wp_get_cache_type();
 		WP_CLI::line( $message );
+	}
+
+	/**
+	 * Determines whether the object cache implementation supports a particular feature.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <feature>
+	 * : Name of the feature to check for.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Check whether is add_multiple supported.
+	 *     $ wp cache supports add_multiple
+	 *     $ echo $?
+	 *     0
+	 *
+	 *     # Bash script for checking whether for support like this:
+	 *     if ! wp cache supports non_existing; then
+	 *         echo 'non_existing is not supported'
+	 *     fi
+	 */
+	public function supports( $args, $assoc_args ) {
+		list ( $feature ) = $args;
+
+		if ( ! function_exists( 'wp_cache_supports' ) ) {
+			WP_CLI::error( 'Checking cache features is only available in WordPress 6.1 and higher' );
+		}
+
+		$supports = wp_cache_supports( $feature );
+
+		if ( $supports ) {
+			WP_CLI::halt( 0 );
+		}
+		WP_CLI::halt( 1 );
 	}
 
 	/**
