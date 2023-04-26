@@ -133,6 +133,59 @@ Feature: Managed the WordPress object cache
       Error: Could not replace object 'bar' in group 'foo'. Does it not exist?
       """
 
+  @require-wp-6.1
+  Scenario: Some cache groups cannot be cleared.
+    Given a WP install
+    When I run `wp cache flush-group add_multiple`
+    Then STDOUT should be:
+      """
+      Success: Cache group 'add_multiple' was flushed.
+      """
+
+  @require-wp-6.1
+  Scenario: Some cache groups cannot be cleared.
+    Given a WP install
+    And a wp-content/mu-plugins/unclearable-test-cache.php file:
+      """php
+      <?php
+      class Dummy_Object_Cache extends WP_Object_Cache {
+        public function flush_group( $group ) {
+          if ( $group === 'permanent_root_cache' ) {
+            return false;
+          }
+          return parent::flush_group( $group );
+        }
+      }
+      $GLOBALS['wp_object_cache'] = new Dummy_Object_Cache();
+      """
+    When I try `wp cache flush-group permanent_root_cache`
+    Then STDERR should be:
+      """
+      Error: Cache group 'permanent_root_cache' was not flushed.
+      """
+
+  @less-than-wp-6.1
+  Scenario: Some cache groups cannot be cleared.
+    Given a WP install
+    And a wp-content/mu-plugins/unclearable-test-cache.php file:
+      """php
+      <?php
+      class Dummy_Object_Cache extends WP_Object_Cache {
+        public function flush_group( $group ) {
+          if ( $group === 'permanent_root_cache' ) {
+            return false;
+          }
+          return parent::flush_group( $group );
+        }
+      }
+      $GLOBALS['wp_object_cache'] = new Dummy_Object_Cache();
+      """
+    When I try `wp cache flush-group permanent_root_cache`
+    Then STDERR should be:
+      """
+      Error: Group flushing is not supported.
+      """
+
   Scenario: Flushing cache on a multisite installation
     Given a WP multisite installation
 
