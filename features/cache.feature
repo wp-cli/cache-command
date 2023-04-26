@@ -180,7 +180,7 @@ Feature: Managed the WordPress object cache
     When I try `wp cache flush-group permanent_root_cache`
     Then STDERR should be:
       """
-      Error: Cache group 'permanent_root_cache' was not flushed.
+      Error: Group flushing is not supported.
       """
 
   Scenario: Flushing cache on a multisite installation
