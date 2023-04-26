@@ -37,6 +37,7 @@
             "cache decr",
             "cache delete",
             "cache flush",
+            "cache flush-group",
             "cache get",
             "cache incr",
             "cache replace",

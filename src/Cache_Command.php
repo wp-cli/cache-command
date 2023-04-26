@@ -389,12 +389,12 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Clear cache group.
-	 *     $ wp cache clear-group my_group
+	 *     $ wp cache flush-group my_group
 	 *     Success: Cache group 'my_group' was flushed.
 	 *
-	 * @subcommand clear-group
+	 * @subcommand flush-group
 	 */
-	public function clear_group( $args, $assoc_args ) {
+	public function flush_group( $args, $assoc_args ) {
 		list( $group ) = $args;
 
 		if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
