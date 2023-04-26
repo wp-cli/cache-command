@@ -133,6 +133,9 @@ Feature: Managed the WordPress object cache
       Error: Could not replace object 'bar' in group 'foo'. Does it not exist?
       """
 
+  @require-wp-6.1
+  Scenario: Some cache groups cannot be cleared.
+    Given a WP install
     When I run `wp cache flush-group add_multiple`
     Then STDOUT should be:
       """
