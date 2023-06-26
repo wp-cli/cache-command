@@ -1,5 +1,8 @@
 <?php
 
+use WP_CLI\Cache\RecursiveDataStructureTraverser;
+use WP_CLI\Utils;
+
 /**
  * Adds, removes, fetches, and flushes the WP Object Cache object.
  *
@@ -405,5 +408,60 @@ class Cache_Command extends WP_CLI_Command {
 			WP_CLI::error( "Cache group '$group' was not flushed." );
 		}
 		WP_CLI::success( "Cache group '$group' was flushed." );
+	}
+
+	/**
+	 * Get a nested value from the cache.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <key>
+	 * : Cache key.
+	 *
+	 * <key-path>...
+	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 *
+	 * [--group=<group>]
+	 * : Method for grouping data within the cache which allows the same key to be used across groups.
+	 * ---
+	 * default: default
+	 * ---
+	 *
+	 * [--format=<format>]
+	 * : The output format of the value.
+	 * ---
+	 * default: plaintext
+	 * options:
+	 *   - plaintext
+	 *   - json
+	 *   - yaml
+	 * ---
+	 */
+	public function pluck( $args, $assoc_args ) {
+		list($key) = $args;
+		$group = Utils\get_flag_value($assoc_args, 'group');
+
+		$value = wp_cache_get( $key, $group );
+
+		if ( false === $value ) {
+			WP_CLI::halt( 1 );
+		}
+
+		$key_path = array_map( function( $key ) {
+			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
+				return (int) $key;
+			}
+			return $key;
+		}, array_slice( $args, 1 ) );
+
+		$traverser = new RecursiveDataStructureTraverser( $value );
+
+		try {
+			$value = $traverser->get( $key_path );
+		} catch ( \Exception $e ) {
+			die( 1 );
+		}
+
+		WP_CLI::print_value( $value, $assoc_args );
 	}
 }
