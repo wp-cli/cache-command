@@ -1,5 +1,6 @@
 <?php
 
+use WP_CLI\Cache\RecursiveDataStructureTraverser;
 use WP_CLI\Utils;
 
 /**
@@ -402,6 +403,61 @@ class Transient_Command extends WP_CLI_Command {
 			$fields
 		);
 		$formatter->display_items( $results );
+	}
+
+	/**
+	 * Get a nested value from a transient.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <key>
+	 * : Key for the transient.
+	 *
+	 * <key-path>...
+	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 *
+	 * [--format=<format>]
+	 * : The output format of the value.
+	 * ---
+	 * default: plaintext
+	 * options:
+	 *   - plaintext
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * [--network]
+	 * : Get the value of a network|site transient. On single site, this is
+	 * a specially-named cache key. On multisite, this is a global cache
+	 * (instead of local to the site).
+	 */
+	public function pluck( $args, $assoc_args ) {
+		list( $key ) = $args;
+
+		$func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+		$value = $func( $key );
+
+		if ( false === $value ) {
+			WP_CLI::warning( 'Transient with key "' . $key . '" is not set.' );
+			exit;
+		}
+
+		$key_path = array_map( function( $key ) {
+			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
+				return (int) $key;
+			}
+			return $key;
+		}, array_slice( $args, 1 ) );
+
+		$traverser = new RecursiveDataStructureTraverser( $value );
+
+		try {
+			$value = $traverser->get( $key_path );
+		} catch ( \Exception $e ) {
+			die( 1 );
+		}
+
+		WP_CLI::print_value( $value, $assoc_args );
 	}
 
 	/**
