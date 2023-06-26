@@ -210,3 +210,35 @@ Feature: Managed the WordPress object cache
 
     When I run `wp cache supports set_multiple`
     Then the return code should be 0
+
+  Scenario: Nested values can be retrieved at any depth.
+    Given a WP install
+    And a wp-content/mu-plugins/test-harness.php file:
+      """
+      <?php
+      $set_foo = function(){
+        wp_cache_set( 'my_key', ['foo' => 'bar'] );
+        wp_cache_set( 'my_key_2', ['foo' => ['bar' => 'baz']] );
+        wp_cache_set( 'my_key_custom', ['foo_custom' => ['bar_custom' => 'baz_custom']], 'my_custom_group' );
+      };
+
+      WP_CLI::add_hook( 'before_invoke:cache pluck', $set_foo );
+      """
+
+    When I try `wp cache pluck my_key foo`
+    Then STDOUT should be:
+      """
+      bar
+      """
+
+    When I try `wp cache pluck my_key_2 foo bar`
+    Then STDOUT should be:
+      """
+      baz
+      """
+
+    When I try `wp cache pluck my_key_custom foo_custom bar_custom --group=my_custom_group`
+    Then STDOUT should be:
+      """
+      baz_custom
+      """
