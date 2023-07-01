@@ -464,4 +464,92 @@ class Cache_Command extends WP_CLI_Command {
 
 		WP_CLI::print_value( $value, $assoc_args );
 	}
+
+	/**
+	 * Update a nested value from the cache.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <action>
+	 * : Patch action to perform.
+	 * ---
+	 * options:
+	 *   - insert
+	 *   - update
+	 *   - delete
+	 * ---
+	 *
+	 * <key>
+	 * : Cache key.
+	 *
+	 * <key-path>...
+	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 *
+	 * [<value>]
+	 * : The new value. If omitted, the value is read from STDIN.
+	 *
+	 * [--group=<group>]
+	 * : Method for grouping data within the cache which allows the same key to be used across groups.
+	 * ---
+	 * default: default
+	 * ---
+	 *
+	 * [--format=<format>]
+	 * : The serialization format for the value.
+	 * ---
+	 * default: plaintext
+	 * options:
+	 *   - plaintext
+	 *   - json
+	 * ---
+	 */
+	public function patch( $args, $assoc_args ) {
+		list( $action, $key ) = $args;
+		$group = Utils\get_flag_value( $assoc_args, 'group' );
+
+		$key_path = array_map( function ( $key ) {
+			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
+				return (int) $key;
+			}
+
+			return $key;
+		}, array_slice( $args, 2 ) );
+
+		if ( 'delete' === $action ) {
+			$patch_value = null;
+		} elseif ( \WP_CLI\Entity\Utils::has_stdin() ) {
+			$stdin_value = WP_CLI::get_value_from_arg_or_stdin( $args, - 1 );
+			$patch_value = WP_CLI::read_value( trim( $stdin_value ), $assoc_args );
+		} else {
+			// Take the patch value as the last positional argument. Mutates $key_path to be 1 element shorter!
+			$patch_value = WP_CLI::read_value( array_pop( $key_path ), $assoc_args );
+		}
+
+		/* Need to make a copy of $current_value here as it is modified by reference */
+		$old_value = wp_cache_get($key, $group);
+		$current_value = $old_value;
+		if (is_object($old_value)) {
+			$current_value = clone $old_value;
+		}
+
+		$traverser = new RecursiveDataStructureTraverser( $current_value );
+
+		try {
+			$traverser->$action( $key_path, $patch_value );
+		} catch ( \Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+
+		$patched_value = $traverser->value();
+
+		if ( $patched_value === $old_value ) {
+			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
+		} else {
+			if ( wp_cache_set( $key, $patched_value, $group ) ) {
+				WP_CLI::success( "Updated cache key '$key'." );
+			} else {
+				WP_CLI::error( "Could not update cache key '$key'." );
+			}
+		}
+	}
 }
