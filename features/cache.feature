@@ -192,13 +192,13 @@ Feature: Managed the WordPress object cache
     When I try `wp cache flush`
     Then STDERR should not contain:
       """
-      Warning: Ignoring the --url=<url> argument because flushing the cache affects all sites on a multisite installation.
+      Warning: Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.
       """
 
     When I try `wp cache flush --url=example.com`
     Then STDERR should contain:
       """
-      Warning: Ignoring the --url=<url> argument because flushing the cache affects all sites on a multisite installation.
+      Warning: Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.
       """
 
   @require-wp-6.1
