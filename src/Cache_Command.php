@@ -157,7 +157,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function flush( $args, $assoc_args ) {
 
 		if ( WP_CLI::has_config( 'url' ) && ! empty( WP_CLI::get_config()['url'] ) && is_multisite() ) {
-			WP_CLI::warning( 'Ignoring the --url=<url> argument because flushing the cache affects all sites on a multisite installation.' );
+			WP_CLI::warning( 'Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.' );
 		}
 
 		$value = wp_cache_flush();
