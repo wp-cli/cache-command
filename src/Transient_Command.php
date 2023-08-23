@@ -461,6 +461,99 @@ class Transient_Command extends WP_CLI_Command {
 	}
 
 	/**
+	 * Update a nested value from a transient.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <action>
+	 * : Patch action to perform.
+	 * ---
+	 * options:
+	 *   - insert
+	 *   - update
+	 *   - delete
+	 * ---
+	 *
+	 * <key>
+	 * : Key for the transient.
+	 *
+	 * <key-path>...
+	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 *
+	 * [<value>]
+	 * : The new value. If omitted, the value is read from STDIN.
+	 *
+	 * [--format=<format>]
+	 * : The serialization format for the value.
+	 * ---
+	 * default: plaintext
+	 * options:
+	 *   - plaintext
+	 *   - json
+	 * ---
+	 *
+	 * [--expiration=<expiration>]
+	 * : Time until expiration, in seconds.
+	 *
+	 * [--network]
+	 * : Get the value of a network|site transient. On single site, this is
+	 * a specially-named cache key. On multisite, this is a global cache
+	 * (instead of local to the site).
+	 */
+	public function patch( $args, $assoc_args ) {
+		list( $action, $key ) = $args;
+		$expiration = (int) Utils\get_flag_value($assoc_args, 'expiration', 0);
+
+		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
+		$write_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
+
+		$key_path = array_map( function ( $key ) {
+			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
+				return (int) $key;
+			}
+
+			return $key;
+		}, array_slice( $args, 2 ) );
+
+		if ( 'delete' === $action ) {
+			$patch_value = null;
+		} elseif ( \WP_CLI\Entity\Utils::has_stdin() ) {
+			$stdin_value = WP_CLI::get_value_from_arg_or_stdin( $args, - 1 );
+			$patch_value = WP_CLI::read_value( trim( $stdin_value ), $assoc_args );
+		} else {
+			// Take the patch value as the last positional argument. Mutates $key_path to be 1 element shorter!
+			$patch_value = WP_CLI::read_value( array_pop( $key_path ), $assoc_args );
+		}
+
+		/* Need to make a copy of $current_value here as it is modified by reference */
+		$old_value = $read_func( $key );
+		$current_value = $old_value;
+		if ( is_object($old_value) ) {
+			$current_value = clone $old_value;
+		}
+
+		$traverser = new RecursiveDataStructureTraverser( $current_value );
+
+		try {
+			$traverser->$action( $key_path, $patch_value );
+		} catch ( \Exception $e ) {
+			WP_CLI::error( $e->getMessage() );
+		}
+
+		$patched_value = $traverser->value();
+
+		if ( $patched_value === $old_value ) {
+			WP_CLI::success( "Value passed for transient '$key' is unchanged." );
+		} else {
+			if ( $write_func( $key, $patched_value, $expiration ) ) {
+				WP_CLI::success( "Updated transient '$key'." );
+			} else {
+				WP_CLI::error( "Could not update transient '$key'." );
+			}
+		}
+	}
+
+	/**
 	 * Retrieves the expiration time.
 	 *
 	 * @param string $name              Transient name.
