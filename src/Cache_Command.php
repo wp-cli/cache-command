@@ -494,6 +494,12 @@ class Cache_Command extends WP_CLI_Command {
 	 * default: default
 	 * ---
 	 *
+	 * [--expiration=<expiration>]
+	 *  : Define how long to keep the value, in seconds. `0` means as long as possible.
+	 *  ---
+	 *  default: 0
+	 *  ---
+	 *
 	 * [--format=<format>]
 	 * : The serialization format for the value.
 	 * ---
@@ -506,6 +512,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
 		$group = Utils\get_flag_value( $assoc_args, 'group' );
+		$expiration = Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map( function ( $key ) {
 			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
@@ -545,7 +552,7 @@ class Cache_Command extends WP_CLI_Command {
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
 		} else {
-			if ( wp_cache_set( $key, $patched_value, $group ) ) {
+			if ( wp_cache_set( $key, $patched_value, $group, $expiration ) ) {
 				WP_CLI::success( "Updated cache key '$key'." );
 			} else {
 				WP_CLI::error( "Could not update cache key '$key'." );
