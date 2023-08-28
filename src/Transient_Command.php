@@ -442,12 +442,15 @@ class Transient_Command extends WP_CLI_Command {
 			exit;
 		}
 
-		$key_path = array_map( function( $key ) {
-			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
-				return (int) $key;
-			}
-			return $key;
-		}, array_slice( $args, 1 ) );
+		$key_path = array_map(
+			function( $key ) {
+				if ( is_numeric( $key ) && ( (string) intval( $key ) === $key ) ) {
+					return (int) $key;
+				}
+				return $key;
+			},
+			array_slice( $args, 1 )
+		);
 
 		$traverser = new RecursiveDataStructureTraverser( $value );
 
@@ -502,18 +505,21 @@ class Transient_Command extends WP_CLI_Command {
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$expiration = (int) Utils\get_flag_value($assoc_args, 'expiration', 0);
+		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration', 0 );
 
 		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
-		$write_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
+		$write_func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
 
-		$key_path = array_map( function ( $key ) {
-			if ( is_numeric( $key ) && ( $key === (string) intval( $key ) ) ) {
-				return (int) $key;
-			}
+		$key_path = array_map(
+			function ( $key ) {
+				if ( is_numeric( $key ) && ( (string) intval( $key ) === $key ) ) {
+					return (int) $key;
+				}
 
-			return $key;
-		}, array_slice( $args, 2 ) );
+				return $key;
+			},
+			array_slice( $args, 2 )
+		);
 
 		if ( 'delete' === $action ) {
 			$patch_value = null;
@@ -526,9 +532,9 @@ class Transient_Command extends WP_CLI_Command {
 		}
 
 		/* Need to make a copy of $current_value here as it is modified by reference */
-		$old_value = $read_func( $key );
+		$old_value     = $read_func( $key );
 		$current_value = $old_value;
-		if ( is_object($old_value) ) {
+		if ( is_object( $old_value ) ) {
 			$current_value = clone $old_value;
 		}
 
