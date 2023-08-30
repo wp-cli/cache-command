@@ -406,5 +406,4 @@ class Cache_Command extends WP_CLI_Command {
 		}
 		WP_CLI::success( "Cache group '$group' was flushed." );
 	}
-
 }

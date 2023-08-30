@@ -466,8 +466,7 @@ class Transient_Command extends WP_CLI_Command {
 					time()
 				)
 			);
-		} else {
-			if ( ! is_multisite() ) {
+		} elseif ( ! is_multisite() ) {
 				// Non-Multisite stores site transients in the options table.
 				$count += $wpdb->query(
 					$wpdb->prepare(
@@ -481,21 +480,20 @@ class Transient_Command extends WP_CLI_Command {
 						time()
 					)
 				);
-			} else {
-				// Multisite stores site transients in the sitemeta table.
-				$count += $wpdb->query(
-					$wpdb->prepare(
-						"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+		} else {
+			// Multisite stores site transients in the sitemeta table.
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
 							WHERE a.meta_key LIKE %s
 							AND a.meta_key NOT LIKE %s
 							AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
 							AND b.meta_value < %d",
-						Utils\esc_like( '_site_transient_' ) . '%',
-						Utils\esc_like( '_site_transient_timeout_' ) . '%',
-						time()
-					)
-				);
-			}
+					Utils\esc_like( '_site_transient_' ) . '%',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%',
+					time()
+				)
+			);
 		}
 
 		// The above queries delete the transient and the transient timeout
@@ -553,8 +551,7 @@ class Transient_Command extends WP_CLI_Command {
 					Utils\esc_like( '_transient_' ) . '%'
 				)
 			);
-		} else {
-			if ( ! is_multisite() ) {
+		} elseif ( ! is_multisite() ) {
 				// Non-Multisite stores site transients in the options table.
 				$deleted = $wpdb->query(
 					$wpdb->prepare(
@@ -575,28 +572,27 @@ class Transient_Command extends WP_CLI_Command {
 						Utils\esc_like( '_site_transient_' ) . '%'
 					)
 				);
-			} else {
-				// Multisite stores site transients in the sitemeta table.
-				$deleted = $wpdb->query(
-					$wpdb->prepare(
-						"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+		} else {
+			// Multisite stores site transients in the sitemeta table.
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
 							WHERE a.meta_key LIKE %s
 							AND a.meta_key NOT LIKE %s
 							AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )",
-						Utils\esc_like( '_site_transient_' ) . '%',
-						Utils\esc_like( '_site_transient_timeout_' ) . '%'
-					)
-				);
+					Utils\esc_like( '_site_transient_' ) . '%',
+					Utils\esc_like( '_site_transient_timeout_' ) . '%'
+				)
+			);
 
-				$count += $deleted / 2; // Ignore affected rows for timeouts.
+			$count += $deleted / 2; // Ignore affected rows for timeouts.
 
-				$count += $wpdb->query(
-					$wpdb->prepare(
-						"DELETE FROM $wpdb->sitemeta WHERE meta_key LIKE %s",
-						Utils\esc_like( '_site_transient_' ) . '%'
-					)
-				);
-			}
+			$count += $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM $wpdb->sitemeta WHERE meta_key LIKE %s",
+					Utils\esc_like( '_site_transient_' ) . '%'
+				)
+			);
 		}
 
 		if ( $count > 0 ) {
