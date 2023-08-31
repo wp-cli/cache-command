@@ -6,8 +6,9 @@ Feature: Patch command available for the object cache
       """php
       <?php
       $set_foo = function(){
-        wp_cache_set( 'my_key', ['foo' => 'bar'] );
-        wp_cache_set( 'other_key', ['fuz' => 'biz'] );
+        //TODO: DEBUG, remove before merging branch.
+        WP_CLI::log( var_export( wp_cache_set( 'my_key', ['foo' => 'bar'] ), true ) );
+        WP_CLI::log( var_export( wp_cache_set( 'other_key', ['fuz' => 'biz'] ), true ) );
 
         $complex_key = (object) [
             'foo' => (object) [
