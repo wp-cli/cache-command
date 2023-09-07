@@ -448,7 +448,7 @@ class Cache_Command extends WP_CLI_Command {
 		}
 
 		$key_path = array_map(
-			function( $key ) {
+			function ( $key ) {
 				if ( is_numeric( $key ) && ( (string) intval( $key ) === $key ) ) {
 					return (int) $key;
 				}
@@ -557,12 +557,10 @@ class Cache_Command extends WP_CLI_Command {
 
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
-		} else {
-			if ( wp_cache_set( $key, $patched_value, $group, $expiration ) ) {
+		} elseif ( wp_cache_set( $key, $patched_value, $group, $expiration ) ) {
 				WP_CLI::success( "Updated cache key '$key'." );
-			} else {
-				WP_CLI::error( "Could not update cache key '$key'." );
-			}
+		} else {
+			WP_CLI::error( "Could not update cache key '$key'." );
 		}
 	}
 }
