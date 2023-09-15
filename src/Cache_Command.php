@@ -530,12 +530,22 @@ class Cache_Command extends WP_CLI_Command {
 
 		if ( 'delete' === $action ) {
 			$patch_value = null;
-		} elseif ( \WP_CLI\Entity\Utils::has_stdin() ) {
-			$stdin_value = WP_CLI::get_value_from_arg_or_stdin( $args, - 1 );
-			$patch_value = WP_CLI::read_value( trim( $stdin_value ), $assoc_args );
 		} else {
-			// Take the patch value as the last positional argument. Mutates $key_path to be 1 element shorter!
-			$patch_value = WP_CLI::read_value( array_pop( $key_path ), $assoc_args );
+			$stdin_value = WP_CLI\Cache\Utils::has_stdin()
+				? trim( WP_CLI::get_value_from_arg_or_stdin( $args, -1 ) )
+				: null;
+
+			if ( ! empty( $stdin_value ) ) {
+				$patch_value = WP_CLI::read_value( $stdin_value, $assoc_args );
+			} elseif ( count( $key_path ) > 1 ) {
+				$patch_value = WP_CLI::read_value( array_pop( $key_path ), $assoc_args );
+			} else {
+				$patch_value = null;
+			}
+
+			if ( null === $patch_value ) {
+				WP_CLI::error( 'Please provide value to update.' );
+			}
 		}
 
 		/* Need to make a copy of $current_value here as it is modified by reference */
