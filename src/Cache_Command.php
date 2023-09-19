@@ -486,7 +486,7 @@ class Cache_Command extends WP_CLI_Command {
 	 * : Cache key.
 	 *
 	 * <key-path>...
-	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 * : The name(s) of the keys within the value to locate the value to patch.
 	 *
 	 * [<value>]
 	 * : The new value. If omitted, the value is read from STDIN.
