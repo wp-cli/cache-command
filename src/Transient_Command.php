@@ -481,7 +481,7 @@ class Transient_Command extends WP_CLI_Command {
 	 * : Key for the transient.
 	 *
 	 * <key-path>...
-	 * : The name(s) of the keys within the value to locate the value to pluck.
+	 * : The name(s) of the keys within the value to locate the value to patch.
 	 *
 	 * [<value>]
 	 * : The new value. If omitted, the value is read from STDIN.
