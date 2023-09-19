@@ -438,7 +438,7 @@ class Cache_Command extends WP_CLI_Command {
 	 * ---
 	 */
 	public function pluck( $args, $assoc_args ) {
-		list($key) = $args;
+		list( $key ) = $args;
 		$group     = Utils\get_flag_value( $assoc_args, 'group' );
 
 		$value = wp_cache_get( $key, $group );
