@@ -1,6 +1,6 @@
 <?php
 
-use WP_CLI\Cache\RecursiveDataStructureTraverser;
+use WP_CLI\Traverser\RecursiveDataStructureTraverser;
 use WP_CLI\Utils;
 
 /**
@@ -531,7 +531,7 @@ class Cache_Command extends WP_CLI_Command {
 		if ( 'delete' === $action ) {
 			$patch_value = null;
 		} else {
-			$stdin_value = WP_CLI\Cache\Utils::has_stdin()
+			$stdin_value = Utils\has_stdin()
 				? trim( WP_CLI::get_value_from_arg_or_stdin( $args, -1 ) )
 				: null;
 
