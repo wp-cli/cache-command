@@ -2,16 +2,8 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from transient can be updated at any depth.
     Given a WP install
-    And a wp-content/mu-plugins/test-harness.php file:
-      """php
-      <?php
-      $set_foo = function(){
-        set_transient( 'my_key', ['foo' => 'bar'] );
-        set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );
-      };
-
-      WP_CLI::add_hook( 'before_invoke:transient patch', $set_foo );
-      """
+    And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
+    And I run `wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
 
     When I run `wp transient patch insert my_key fuz baz`
     Then STDOUT should be:
