@@ -53,6 +53,12 @@ Feature: Patch command available for the transient cache
       {"foo":{"bar":"baz","fuz":"biz"}}
       """
 
+    When I try `wp transient patch insert unknown_key foo bar`
+    Then STDERR should be:
+      """
+      Error: Cannot create key "foo" on data type boolean
+      """
+
   Scenario: Nested values from transient can be updated at any depth.
     Given a WP install
     And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
@@ -106,6 +112,12 @@ Feature: Patch command available for the transient cache
       {"foo":{"bar":"biz"}}
       """
 
+    When I try `wp transient patch update unknown_key foo bar`
+    Then STDERR should be:
+      """
+      Error: No data exists for key "foo"
+      """
+
   Scenario: Nested values from transient can be deleted at any depth.
     Given a WP install
     And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
@@ -145,6 +157,12 @@ Feature: Patch command available for the transient cache
     Then STDOUT should be:
       """
       []
+      """
+
+    When I try `wp transient patch delete unknown_key foo`
+    Then STDERR should be:
+      """
+      Error: No data exists for key "foo"
       """
 
   Scenario: Nested values from site transient can be inserted at any depth.
@@ -200,6 +218,12 @@ Feature: Patch command available for the transient cache
       {"foo":{"bar":"baz","fuz":"biz"}}
       """
 
+    When I try `wp transient patch insert unknown_key foo bar --network`
+    Then STDERR should be:
+      """
+      Error: Cannot create key "foo" on data type boolean
+      """
+
   Scenario: Nested values from site transient can be updated at any depth.
     Given a WP multisite install
     And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
@@ -253,6 +277,12 @@ Feature: Patch command available for the transient cache
       {"foo":{"bar":"biz"}}
       """
 
+    When I try `wp transient patch update unknown_key foo bar --network`
+    Then STDERR should be:
+      """
+      Error: No data exists for key "foo"
+      """
+
   Scenario: Nested values from site transient can be deleted at any depth.
     Given a WP multisite install
     And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
@@ -292,4 +322,10 @@ Feature: Patch command available for the transient cache
     Then STDOUT should be:
       """
       []
+      """
+
+    When I try `wp transient patch delete unknown_key foo --network`
+    Then STDERR should be:
+      """
+      Error: No data exists for key "foo"
       """
