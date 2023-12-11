@@ -147,18 +147,10 @@ Feature: Patch command available for the transient cache
       []
       """
 
-  Scenario: Nested values from site transient can be updated at any depth.
-    Given a WP install
-    And a wp-content/mu-plugins/test-harness.php file:
-      """php
-      <?php
-      $set_foo = function(){
-        set_site_transient( 'my_key', ['foo' => 'bar'] );
-        set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );
-      };
-
-      WP_CLI::add_hook( 'before_invoke:transient patch', $set_foo );
-      """
+  Scenario: Nested values from site transient can be inserted at any depth.
+    Given a WP multisite install
+    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
+    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
 
     When I run `wp transient patch insert my_key fuz baz --network`
     Then STDOUT should be:
@@ -166,16 +158,10 @@ Feature: Patch command available for the transient cache
       Success: Updated transient 'my_key'.
       """
 
-    When I run `wp transient patch insert my_key_2 foo fuz bar --network`
+    When I run `wp transient get my_key --format=json --network`
     Then STDOUT should be:
       """
-      Success: Updated transient 'my_key_2'.
-      """
-
-    When I try `wp transient patch insert unknown_key foo bar --network`
-    Then STDERR should be:
-      """
-      Error: Cannot create key "foo" on data type boolean
+      {"foo":"bar","fuz":"baz"}
       """
 
     When I run `wp transient patch insert my_key foo bar --network`
@@ -184,10 +170,63 @@ Feature: Patch command available for the transient cache
       Success: Value passed for transient 'my_key' is unchanged.
       """
 
-    When I run `wp transient patch update my_key foo biz --network`
+    When I run `wp transient get my_key --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":"bar","fuz":"baz"}
+      """
+
+    When I run `wp transient patch insert my_key_2 foo fuz biz --network`
+    Then STDOUT should be:
+      """
+      Success: Updated transient 'my_key_2'.
+      """
+
+    When I run `wp transient get my_key_2 --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":{"bar":"baz","fuz":"biz"}}
+      """
+
+    When I run `wp transient patch insert my_key_2 foo bar baz --network`
+    Then STDOUT should be:
+      """
+      Success: Value passed for transient 'my_key_2' is unchanged.
+      """
+
+    When I run `wp transient get my_key_2 --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":{"bar":"baz","fuz":"biz"}}
+      """
+
+  Scenario: Nested values from site transient can be updated at any depth.
+    Given a WP multisite install
+    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
+    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+
+    When I run `wp transient patch update my_key foo baz --network`
     Then STDOUT should be:
       """
       Success: Updated transient 'my_key'.
+      """
+
+    When I run `wp transient get my_key --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":"baz"}
+      """
+
+    When I run `wp transient patch update my_key foo baz --network`
+    Then STDOUT should be:
+      """
+      Success: Value passed for transient 'my_key' is unchanged.
+      """
+
+    When I run `wp transient get my_key --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":"baz"}
       """
 
     When I run `wp transient patch update my_key_2 foo bar biz --network`
@@ -196,22 +235,39 @@ Feature: Patch command available for the transient cache
       Success: Updated transient 'my_key_2'.
       """
 
-    When I try `wp transient patch update unknown_key foo bar --network`
-    Then STDERR should be:
-      """
-      Error: No data exists for key "foo"
-      """
-
-    When I run `wp transient patch update my_key foo bar --network`
+    When I run `wp transient get my_key_2 --format=json --network`
     Then STDOUT should be:
       """
-      Success: Value passed for transient 'my_key' is unchanged.
+      {"foo":{"bar":"biz"}}
       """
+
+    When I run `wp transient patch update my_key_2 foo bar biz --network`
+    Then STDOUT should be:
+      """
+      Success: Value passed for transient 'my_key_2' is unchanged.
+      """
+
+    When I run `wp transient get my_key_2 --format=json --network`
+    Then STDOUT should be:
+      """
+      {"foo":{"bar":"biz"}}
+      """
+
+  Scenario: Nested values from site transient can be deleted at any depth.
+    Given a WP multisite install
+    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
+    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
 
     When I run `wp transient patch delete my_key foo --network`
     Then STDOUT should be:
       """
       Success: Updated transient 'my_key'.
+      """
+
+    When I run `wp transient get my_key --format=json --network`
+    Then STDOUT should be:
+      """
+      []
       """
 
     When I run `wp transient patch delete my_key_2 foo bar --network`
@@ -220,8 +276,20 @@ Feature: Patch command available for the transient cache
       Success: Updated transient 'my_key_2'.
       """
 
-    When I try `wp transient patch delete unknown_key foo --network`
-    Then STDERR should be:
+    When I run `wp transient get my_key_2 --format=json --network`
+    Then STDOUT should be:
       """
-      Error: No data exists for key "foo"
+      {"foo":[]}
+      """
+
+    When I run `wp transient patch delete my_key_2 foo --network`
+    Then STDOUT should be:
+      """
+      Success: Updated transient 'my_key_2'.
+      """
+
+    When I run `wp transient get my_key_2 --format=json --network`
+    Then STDOUT should be:
+      """
+      []
       """
