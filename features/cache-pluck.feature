@@ -31,3 +31,10 @@ Feature: Pluck command available for the object cache
       """
       bar_custom
       """
+
+    When I try `wp cache pluck unknown_key test`
+    Then STDERR should be:
+      """
+      Warning: No object found for the key "unknown_key" in group "default"
+      """
+
