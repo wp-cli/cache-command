@@ -57,6 +57,9 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting all transients on single site
     Given a WP install
+    # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
+    # additional transients which cause some steps to fail when testing.
+    And I run `wp config set WP_DEVELOPMENT_MODE all`
     And I run `wp transient list --format=count`
     And save STDOUT as {EXISTING_TRANSIENTS}
     And I run `expr {EXISTING_TRANSIENTS} + 2`
@@ -193,6 +196,9 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting all transients on multisite
     Given a WP multisite install
+    # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
+    # additional transients which cause some steps to fail when testing.
+    And I run `wp config set WP_DEVELOPMENT_MODE all`
     And I run `wp site create --slug=foo`
     And I run `wp transient list --format=count`
     And save STDOUT as {EXISTING_TRANSIENTS}
@@ -420,16 +426,24 @@ Feature: Manage WordPress transient cache
       """
 
     When I run `wp transient list --network --format=csv`
-    Then STDOUT should be:
+    Then STDOUT should contain:
       """
-      name,value,expiration
       foo4,bar4,false
+      """
+    And STDOUT should contain:
+      """
       foo5,bar5,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo6,bar6,1321009871
       """
 
   Scenario: List transients on multisite
     Given a WP multisite install
+    # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
+    # additional transients which cause some steps to fail when testing.
+    And I run `wp config set WP_DEVELOPMENT_MODE all`
     And I run `wp transient set foo bar`
     And I run `wp transient set foo2 bar2 610`
     And I run `wp option update _transient_timeout_foo2 95649119999`
@@ -465,11 +479,16 @@ Feature: Manage WordPress transient cache
       """
 
     When I run `wp transient list --network --format=csv`
-    Then STDOUT should be:
+    Then STDOUT should contain:
       """
-      name,value,expiration
       foo4,bar4,false
+      """
+    And STDOUT should contain:
+      """
       foo5,bar5,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo6,bar6,1321009871
       """
 
