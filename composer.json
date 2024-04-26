@@ -40,6 +40,8 @@
             "cache flush-group",
             "cache get",
             "cache incr",
+            "cache patch",
+            "cache pluck",
             "cache replace",
             "cache set",
             "cache supports",
@@ -47,9 +49,11 @@
             "transient",
             "transient delete",
             "transient get",
+            "transient list",
+            "transient patch",
+            "transient pluck",
             "transient set",
-            "transient type",
-            "transient list"
+            "transient type"
         ]
     },
     "autoload": {
