@@ -444,7 +444,7 @@ class Cache_Command extends WP_CLI_Command {
 		$value = wp_cache_get( $key, $group );
 
 		if ( false === $value ) {
-			WP_CLI::warning( 'No object found for the key "' . $key . '" in group "' . $group . '"' );
+			WP_CLI::warning( "No object found for the key '$key' in group '$group'" );
 			exit;
 		}
 
