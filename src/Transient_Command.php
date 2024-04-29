@@ -560,10 +560,13 @@ class Transient_Command extends WP_CLI_Command {
 
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for transient '$key' is unchanged." );
-		} elseif ( $write_func( $key, $patched_value, $expiration ) ) {
-				WP_CLI::success( "Updated transient '$key'." );
 		} else {
-			WP_CLI::error( "Could not update transient '$key'." );
+			$success = $write_func( $key, $patched_value, $expiration );
+			if ( $success ) {
+				WP_CLI::success( "Updated transient '$key'." );
+			} else {
+				WP_CLI::error( "Could not update transient '$key'." );
+			}
 		}
 	}
 
