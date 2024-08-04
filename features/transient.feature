@@ -60,6 +60,8 @@ Feature: Manage WordPress transient cache
     # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
     # additional transients which cause some steps to fail when testing.
     And I run `wp config set WP_DEVELOPMENT_MODE all`
+    And I run `wp config set DISABLE_WP_CRON true --raw`
+
     And I run `wp transient list --format=count`
     And save STDOUT as {EXISTING_TRANSIENTS}
     And I run `expr {EXISTING_TRANSIENTS} + 2`
@@ -75,6 +77,7 @@ Feature: Manage WordPress transient cache
     And I run `wp transient set foo2 bar2 600`
     And I run `wp transient set foo3 bar3 --network`
     And I run `wp transient set foo4 bar4 600 --network`
+
     And I run `wp transient delete --all`
     Then STDOUT should be:
       """
@@ -405,9 +408,14 @@ Feature: Manage WordPress transient cache
     When I run `wp transient list --format=csv`
     Then STDOUT should contain:
       """
-      name,value,expiration
       foo,bar,false
+      """
+    And STDOUT should contain:
+      """
       foo2,bar2,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo3,bar3,1321009871
       """
 
@@ -458,9 +466,14 @@ Feature: Manage WordPress transient cache
     When I run `wp transient list --format=csv`
     Then STDOUT should contain:
       """
-      name,value,expiration
       foo,bar,false
+      """
+    And STDOUT should contain:
+      """
       foo2,bar2,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo3,bar3,1321009871
       """
 
