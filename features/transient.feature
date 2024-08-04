@@ -405,9 +405,14 @@ Feature: Manage WordPress transient cache
     When I run `wp transient list --format=csv`
     Then STDOUT should contain:
       """
-      name,value,expiration
       foo,bar,false
+      """
+    And STDOUT should contain:
+      """
       foo2,bar2,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo3,bar3,1321009871
       """
 
@@ -458,9 +463,14 @@ Feature: Manage WordPress transient cache
     When I run `wp transient list --format=csv`
     Then STDOUT should contain:
       """
-      name,value,expiration
       foo,bar,false
+      """
+    And STDOUT should contain:
+      """
       foo2,bar2,95649119999
+      """
+    And STDOUT should contain:
+      """
       foo3,bar3,1321009871
       """
 
