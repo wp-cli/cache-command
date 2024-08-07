@@ -60,7 +60,6 @@ Feature: Manage WordPress transient cache
     # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
     # additional transients which cause some steps to fail when testing.
     And I run `wp config set WP_DEVELOPMENT_MODE all`
-    And I run `wp config set DISABLE_WP_CRON true --raw`
 
     And I run `wp transient list --format=count`
     And save STDOUT as {EXISTING_TRANSIENTS}
