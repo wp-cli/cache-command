@@ -127,10 +127,10 @@ Feature: Manage WordPress transient cache
 
   Scenario: Deleting expired transients on single site
     Given a WP install
-    And I run `wp transient set foo bar 60`
-    And I run `wp transient set foo2 bar2 60`
-    And I run `wp transient set foo3 bar3 60 --network`
-    And I run `wp transient set foo4 bar4 60 --network`
+    And I run `wp transient set foo bar 600`
+    And I run `wp transient set foo2 bar2 600`
+    And I run `wp transient set foo3 bar3 600 --network`
+    And I run `wp transient set foo4 bar4 600 --network`
     # Change timeout to be in the past.
     And I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp option update _site_transient_timeout_foo3 1321009871`
@@ -294,12 +294,12 @@ Feature: Manage WordPress transient cache
   Scenario: Deleting expired transients on multisite
     Given a WP multisite install
     And I run `wp site create --slug=foo`
-    And I run `wp transient set foo bar 60`
-    And I run `wp transient set foo2 bar2 60`
-    And I run `wp transient set foo3 bar3 60 --network`
-    And I run `wp transient set foo4 bar4 60 --network`
-    And I run `wp --url=example.com/foo transient set foo5 bar5 60 --network`
-    And I run `wp --url=example.com/foo transient set foo6 bar6 60 --network`
+    And I run `wp transient set foo bar 600`
+    And I run `wp transient set foo2 bar2 600`
+    And I run `wp transient set foo3 bar3 600 --network`
+    And I run `wp transient set foo4 bar4 600 --network`
+    And I run `wp --url=example.com/foo transient set foo5 bar5 600 --network`
+    And I run `wp --url=example.com/foo transient set foo6 bar6 600 --network`
     # Change timeout to be in the past.
     And I run `wp option update _transient_timeout_foo 1321009871`
     And I run `wp site option update _site_transient_timeout_foo3 1321009871`
