@@ -249,6 +249,91 @@ Errors if the value can't be incremented.
 
 
 
+### wp cache patch
+
+Update a nested value from the cache.
+
+~~~
+wp cache patch <action> <key> <key-path>... [<value>] [--group=<group>] [--format=<format>]
+~~~
+
+**OPTIONS**
+
+	<action>
+		Patch action to perform.
+		---
+		options:
+		  - insert
+		  - update
+		  - delete
+		---
+
+	<key>
+		Cache key.
+
+	<key-path>...
+		The name(s) of the keys within the value to locate the value to patch.
+
+	[<value>]
+		The new value. If omitted, the value is read from STDIN.
+
+	[--group=<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+[--expiration=<expiration>]
+ : Define how long to keep the value, in seconds. `0` means as long as possible.
+ ---
+ default: 0
+ ---
+
+	[--format=<format>]
+		The serialization format for the value.
+		---
+		default: plaintext
+		options:
+		  - plaintext
+		  - json
+		---
+
+
+
+### wp cache pluck
+
+Get a nested value from the cache.
+
+~~~
+wp cache pluck <key> <key-path>... [--group=<group>] [--format=<format>]
+~~~
+
+**OPTIONS**
+
+	<key>
+		Cache key.
+
+	<key-path>...
+		The name(s) of the keys within the value to locate the value to pluck.
+
+	[--group=<group>]
+		Method for grouping data within the cache which allows the same key to be used across groups.
+		---
+		default: default
+		---
+
+	[--format=<format>]
+		The output format of the value.
+		---
+		default: plaintext
+		options:
+		  - plaintext
+		  - json
+		  - yaml
+		---
+
+
+
 ### wp cache replace
 
 Replaces a value in the object cache, if the value already exists.
@@ -510,63 +595,6 @@ network|site cache, please see docs for `wp transient`.
 
 
 
-### wp transient set
-
-Sets a transient value.
-
-~~~
-wp transient set <key> <value> [<expiration>] [--network]
-~~~
-
-`<expiration>` is the time until expiration, in seconds.
-
-For a more complete explanation of the transient cache, including the
-network|site cache, please see docs for `wp transient`.
-
-**OPTIONS**
-
-	<key>
-		Key for the transient.
-
-	<value>
-		Value to be set for the transient.
-
-	[<expiration>]
-		Time until expiration, in seconds.
-
-	[--network]
-		Set the value of a network|site transient. On single site, this is
-		is a specially-named cache key. On multisite, this is a global cache
-		(instead of local to the site).
-
-**EXAMPLES**
-
-    $ wp transient set sample_key "test data" 3600
-    Success: Transient added.
-
-
-
-### wp transient type
-
-Determines the type of transients implementation.
-
-~~~
-wp transient type 
-~~~
-
-Indicates whether the transients API is using an object cache or the
-database.
-
-For a more complete explanation of the transient cache, including the
-network|site cache, please see docs for `wp transient`.
-
-**EXAMPLES**
-
-    $ wp transient type
-    Transients are saved to the database.
-
-
-
 ### wp transient list
 
 Lists transients and their values.
@@ -629,6 +657,143 @@ This field will be displayed by default for each matching option:
      | foo3 | bar2  | expired       |
      | foo4 | bar4  | 4 hours       |
      +------+-------+---------------+
+
+
+
+### wp transient patch
+
+Update a nested value from a transient.
+
+~~~
+wp transient patch <action> <key> <key-path>... [<value>] [--format=<format>] [--expiration=<expiration>] [--network]
+~~~
+
+**OPTIONS**
+
+	<action>
+		Patch action to perform.
+		---
+		options:
+		  - insert
+		  - update
+		  - delete
+		---
+
+	<key>
+		Key for the transient.
+
+	<key-path>...
+		The name(s) of the keys within the value to locate the value to patch.
+
+	[<value>]
+		The new value. If omitted, the value is read from STDIN.
+
+	[--format=<format>]
+		The serialization format for the value.
+		---
+		default: plaintext
+		options:
+		  - plaintext
+		  - json
+		---
+
+	[--expiration=<expiration>]
+		Time until expiration, in seconds.
+
+	[--network]
+		Get the value of a network|site transient. On single site, this is
+		a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
+
+
+
+### wp transient pluck
+
+Get a nested value from a transient.
+
+~~~
+wp transient pluck <key> <key-path>... [--format=<format>] [--network]
+~~~
+
+**OPTIONS**
+
+	<key>
+		Key for the transient.
+
+	<key-path>...
+		The name(s) of the keys within the value to locate the value to pluck.
+
+	[--format=<format>]
+		The output format of the value.
+		---
+		default: plaintext
+		options:
+		  - plaintext
+		  - json
+		  - yaml
+		---
+
+	[--network]
+		Get the value of a network|site transient. On single site, this is
+		a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
+
+
+
+### wp transient set
+
+Sets a transient value.
+
+~~~
+wp transient set <key> <value> [<expiration>] [--network]
+~~~
+
+`<expiration>` is the time until expiration, in seconds.
+
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
+
+**OPTIONS**
+
+	<key>
+		Key for the transient.
+
+	<value>
+		Value to be set for the transient.
+
+	[<expiration>]
+		Time until expiration, in seconds.
+
+	[--network]
+		Set the value of a network|site transient. On single site, this is
+		is a specially-named cache key. On multisite, this is a global cache
+		(instead of local to the site).
+
+**EXAMPLES**
+
+    $ wp transient set sample_key "test data" 3600
+    Success: Transient added.
+
+
+
+### wp transient type
+
+Determines the type of transients implementation.
+
+~~~
+wp transient type 
+~~~
+
+Indicates whether the transients API is using an object cache or the
+database.
+
+For a more complete explanation of the transient cache, including the
+network|site cache, please see docs for `wp transient`.
+
+**EXAMPLES**
+
+    $ wp transient type
+    Transients are saved to the database.
 
 ## Installing
 
