@@ -497,6 +497,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--expiration=<expiration>]
 	 * : Time until expiration, in seconds.
+	 * ---
+	 * default: 0
+	 * ---
 	 *
 	 * [--network]
 	 * : Get the value of a network|site transient. On single site, this is
@@ -505,7 +508,7 @@ class Transient_Command extends WP_CLI_Command {
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration', 0 );
+		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$write_func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';

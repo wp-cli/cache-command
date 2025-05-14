@@ -499,10 +499,10 @@ class Cache_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--expiration=<expiration>]
-	 *  : Define how long to keep the value, in seconds. `0` means as long as possible.
-	 *  ---
-	 *  default: 0
-	 *  ---
+	 * : Define how long to keep the value, in seconds. `0` means as long as possible.
+	 * ---
+	 * default: 0
+	 * ---
 	 *
 	 * [--format=<format>]
 	 * : The serialization format for the value.
