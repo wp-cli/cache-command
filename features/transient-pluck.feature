@@ -17,6 +17,18 @@ Feature: Pluck command available for the transient cache
       baz
       """
 
+    When I run `wp transient pluck my_key_2 foo bar --format=json`
+    Then STDOUT should be:
+      """
+      "baz"
+      """
+
+    When I run `wp transient pluck my_key_2 foo --format=json`
+    Then STDOUT should be:
+      """
+      {"bar":"baz"}
+      """
+
     When I try `wp transient pluck unknown_key foo`
     Then STDERR should be:
       """

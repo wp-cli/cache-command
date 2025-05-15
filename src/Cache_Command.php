@@ -499,10 +499,10 @@ class Cache_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--expiration=<expiration>]
-	 *  : Define how long to keep the value, in seconds. `0` means as long as possible.
-	 *  ---
-	 *  default: 0
-	 *  ---
+	 * : Define how long to keep the value, in seconds. `0` means as long as possible.
+	 * ---
+	 * default: 0
+	 * ---
 	 *
 	 * [--format=<format>]
 	 * : The serialization format for the value.
@@ -516,7 +516,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
 		$group                = Utils\get_flag_value( $assoc_args, 'group' );
-		$expiration           = Utils\get_flag_value( $assoc_args, 'expiration' );
+		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map(
 			function ( $key ) {

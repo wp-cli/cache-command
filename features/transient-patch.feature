@@ -53,6 +53,18 @@ Feature: Patch command available for the transient cache
       {"foo":{"bar":"baz","fuz":"biz"}}
       """
 
+    When I run `wp transient patch insert my_key fiz bar --expiration=300`
+    Then STDOUT should be:
+      """
+      Success: Updated transient 'my_key'.
+      """
+
+    When I run `wp transient get my_key --format=json`
+    Then STDOUT should be:
+      """
+      {"foo":"bar","fuz":"baz","fiz":"bar"}
+      """
+
     When I try `wp transient patch insert unknown_key foo bar`
     Then STDERR should be:
       """

@@ -8,6 +8,7 @@ Feature: Patch command available for the object cache
       $set_foo = function(){
         wp_cache_set( 'my_key', ['foo' => 'bar'] );
         wp_cache_set( 'other_key', ['fuz' => 'biz'] );
+        wp_cache_set( 'my_key_in_group', ['fuz' => 'biz'], 'my_group' );
 
         $complex_key = (object) [
             'foo' => (object) [
@@ -34,7 +35,19 @@ Feature: Patch command available for the object cache
       Success: Updated cache key 'complex_key'.
       """
 
+    When I try `wp cache patch insert my_key_in_group foo bar --group=my_group`
+    Then STDOUT should be:
+      """
+      Success: Updated cache key 'my_key_in_group'.
+      """
+
     When I try `wp cache patch insert unknown_key foo bar`
+    Then STDERR should be:
+      """
+      Error: Cannot create key "foo" on data type boolean
+      """
+
+    When I try `wp cache patch insert other_key foo bar --group=unknown_group`
     Then STDERR should be:
       """
       Error: Cannot create key "foo" on data type boolean
@@ -58,6 +71,12 @@ Feature: Patch command available for the object cache
       Success: Updated cache key 'complex_key'.
       """
 
+    When I try `wp cache patch update my_key_in_group fuz baz --group=my_group`
+    Then STDOUT should be:
+      """
+      Success: Updated cache key 'my_key_in_group'.
+      """
+
     When I try `wp cache patch update unknown_key foo test`
     Then STDERR should be:
       """
@@ -70,10 +89,22 @@ Feature: Patch command available for the object cache
       Error: No data exists for key "bar"
       """
 
+    When I try `wp cache patch update my_key foo baz --expiration=60`
+    Then STDOUT should be:
+      """
+      Success: Updated cache key 'my_key'.
+      """
+
     When I run `wp cache patch delete my_key foo`
     Then STDOUT should be:
       """
       Success: Updated cache key 'my_key'.
+      """
+
+    When I try `wp cache patch delete my_key_in_group fuz --group=my_group`
+    Then STDOUT should be:
+      """
+      Success: Updated cache key 'my_key_in_group'.
       """
 
     When I try `wp cache patch delete unknown_key foo`
@@ -86,4 +117,10 @@ Feature: Patch command available for the object cache
     Then STDERR should be:
       """
       Error: No data exists for key "bar"
+      """
+
+    When I try `wp cache patch delete my_key foo --group=my_group`
+    Then STDERR should be:
+      """
+      Error: No data exists for key "foo"
       """
