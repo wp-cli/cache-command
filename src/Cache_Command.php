@@ -516,7 +516,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
 		$group                = Utils\get_flag_value( $assoc_args, 'group' );
-		$expiration           = Utils\get_flag_value( $assoc_args, 'expiration' );
+		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map(
 			function ( $key ) {
