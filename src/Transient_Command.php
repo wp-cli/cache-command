@@ -36,7 +36,7 @@ use WP_CLI\Utils;
  *     # Delete all transients.
  *     $ wp transient delete --all
  *     Success: 14 transients deleted from the database.
- * 
+ *
  *     # Delete all site transients.
  *     $ wp transient delete --all --network
  *     Success: 2 transients deleted from the database.
