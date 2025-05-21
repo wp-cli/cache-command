@@ -158,7 +158,8 @@ class Cache_Command extends WP_CLI_Command {
 	 *     Success: The cache was flushed.
 	 */
 	public function flush( $args, $assoc_args ) {
-
+		// TODO: Needs fixing in wp-cli/wp-cli
+		// @phpstan-ignore offsetAccess.nonOffsetAccessible
 		if ( WP_CLI::has_config( 'url' ) && ! empty( WP_CLI::get_config()['url'] ) && is_multisite() ) {
 			WP_CLI::warning( 'Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.' );
 		}
@@ -439,7 +440,11 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function pluck( $args, $assoc_args ) {
 		list( $key ) = $args;
-		$group       = Utils\get_flag_value( $assoc_args, 'group' );
+
+		/**
+		 * @var string $group
+		 */
+		$group = Utils\get_flag_value( $assoc_args, 'group' );
 
 		$value = wp_cache_get( $key, $group );
 
@@ -512,11 +517,21 @@ class Cache_Command extends WP_CLI_Command {
 	 *   - plaintext
 	 *   - json
 	 * ---
+	 *
+	 * @param string[] $args
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$group                = Utils\get_flag_value( $assoc_args, 'group' );
-		$expiration           = Utils\get_flag_value( $assoc_args, 'expiration' );
+
+		/**
+		 * @var string $group
+		 */
+		$group = Utils\get_flag_value( $assoc_args, 'group' );
+
+		/**
+		 * @var string|null $expiration
+		 */
+		$expiration = Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map(
 			function ( $key ) {
@@ -569,7 +584,7 @@ class Cache_Command extends WP_CLI_Command {
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
 		} else {
-			$success = wp_cache_set( $key, $patched_value, $group, $expiration );
+			$success = wp_cache_set( $key, $patched_value, $group, (int) $expiration );
 			if ( $success ) {
 				WP_CLI::success( "Updated cache key '$key'." );
 			} else {

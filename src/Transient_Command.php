@@ -116,14 +116,16 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     $ wp transient set sample_key "test data" 3600
 	 *     Success: Transient added.
+	 *
+	 * @param string[] $args
 	 */
 	public function set( $args, $assoc_args ) {
 		list( $key, $value ) = $args;
 
-		$expiration = Utils\get_flag_value( $args, 2, 0 );
+		$expiration = $args[2] ?? 0;
 
 		$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
-		if ( $func( $key, $value, $expiration ) ) {
+		if ( $func( $key, $value, (int) $expiration ) ) {
 			WP_CLI::success( 'Transient added.' );
 		} else {
 			WP_CLI::error( 'Transient could not be set.' );
@@ -180,9 +182,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : null;
 
-		$all     = Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
-		$network = Utils\get_flag_value( $assoc_args, 'network' );
+		$all     = (bool) Utils\get_flag_value( $assoc_args, 'all' );
+		$expired = (bool) Utils\get_flag_value( $assoc_args, 'expired' );
+		$network = (bool) Utils\get_flag_value( $assoc_args, 'network' );
 
 		if ( true === $all ) {
 			$this->delete_all( $network );
@@ -301,9 +303,9 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only shows those stored in the database.' );
 		}
 
-		$network        = Utils\get_flag_value( $assoc_args, 'network', false );
-		$unserialize    = Utils\get_flag_value( $assoc_args, 'unserialize', false );
-		$human_readable = Utils\get_flag_value( $assoc_args, 'human-readable', false );
+		$network        = (bool) Utils\get_flag_value( $assoc_args, 'network', false );
+		$unserialize    = (bool) Utils\get_flag_value( $assoc_args, 'unserialize', false );
+		$human_readable = (bool) Utils\get_flag_value( $assoc_args, 'human-readable', false );
 
 		$fields = array( 'name', 'value', 'expiration' );
 		if ( isset( $assoc_args['fields'] ) ) {
@@ -505,7 +507,12 @@ class Transient_Command extends WP_CLI_Command {
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration', 0 );
+
+		/**
+		 * @var string $expiration
+		 */
+		$expiration = Utils\get_flag_value( $assoc_args, 'expiration', 0 );
+		$expiration = (int) $expiration;
 
 		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$write_func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
@@ -582,20 +589,31 @@ class Transient_Command extends WP_CLI_Command {
 	private function get_transient_expiration( $name, $is_site_transient = false, $human_readable = false ) {
 		if ( $is_site_transient ) {
 			if ( is_multisite() ) {
-				$expiration = (int) get_site_option( '_site_transient_timeout_' . $name );
+				/**
+				 * @var string $expiration
+				 */
+				$expiration = get_site_option( '_site_transient_timeout_' . $name );
 			} else {
-				$expiration = (int) get_option( '_site_transient_timeout_' . $name );
+				/**
+				 * @var string $expiration
+				 */
+				$expiration = get_option( '_site_transient_timeout_' . $name );
 			}
 		} else {
-			$expiration = (int) get_option( '_transient_timeout_' . $name );
+			/**
+			 * @var string $expiration
+			 */
+			$expiration = get_option( '_transient_timeout_' . $name );
 		}
+
+		$expiration = (int) $expiration;
 
 		if ( 0 === $expiration ) {
 			return $human_readable ? 'never expires' : 'false';
 		}
 
 		if ( ! $human_readable ) {
-			return $expiration;
+			return (string) $expiration;
 		}
 
 		$now = time();
