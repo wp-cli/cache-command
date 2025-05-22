@@ -73,6 +73,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     $ wp transient get random_key
 	 *     Warning: Transient with key "random_key" is not set.
+	 *
+	 * @param array{string}         $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key ) = $args;
@@ -117,7 +120,8 @@ class Transient_Command extends WP_CLI_Command {
 	 *     $ wp transient set sample_key "test data" 3600
 	 *     Success: Transient added.
 	 *
-	 * @param string[] $args
+	 * @param array{0: string, 1: string, 2?: string} $args       Positional arguments.
+	 * @param array{network?: bool}                   $assoc_args Associative arguments.
 	 */
 	public function set( $args, $assoc_args ) {
 		list( $key, $value ) = $args;
@@ -178,13 +182,16 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     # Delete all transients in a multisite.
 	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
+	 *
+	 * @param array{string}                                     $args       Positional arguments.
+	 * @param array{network?: bool, all?: bool, expired?: bool} $assoc_args Associative arguments.
 	 */
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : null;
 
-		$all     = (bool) Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = (bool) Utils\get_flag_value( $assoc_args, 'expired' );
-		$network = (bool) Utils\get_flag_value( $assoc_args, 'network' );
+		$all     = Utils\get_flag_value( $assoc_args, 'all' );
+		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
+		$network = Utils\get_flag_value( $assoc_args, 'network' );
 
 		if ( true === $all ) {
 			$this->delete_all( $network );
@@ -295,6 +302,9 @@ class Transient_Command extends WP_CLI_Command {
 	*      +------+-------+---------------+
 	 *
 	 * @subcommand list
+	 *
+	 * @param string[] $args Positional arguments. Unused.
+	 * @param array{search?: string,  exclude?: string, network?: bool, unserialize?: bool, 'human-readable'?: bool, fields?: string, format?: string} $assoc_args Associative arguments.
 	 */
 	public function list_( $args, $assoc_args ) {
 		global $wpdb;
@@ -303,9 +313,9 @@ class Transient_Command extends WP_CLI_Command {
 			WP_CLI::warning( 'Transients are stored in an external object cache, and this command only shows those stored in the database.' );
 		}
 
-		$network        = (bool) Utils\get_flag_value( $assoc_args, 'network', false );
-		$unserialize    = (bool) Utils\get_flag_value( $assoc_args, 'unserialize', false );
-		$human_readable = (bool) Utils\get_flag_value( $assoc_args, 'human-readable', false );
+		$network        = Utils\get_flag_value( $assoc_args, 'network', false );
+		$unserialize    = Utils\get_flag_value( $assoc_args, 'unserialize', false );
+		$human_readable = Utils\get_flag_value( $assoc_args, 'human-readable', false );
 
 		$fields = array( 'name', 'value', 'expiration' );
 		if ( isset( $assoc_args['fields'] ) ) {
@@ -432,6 +442,9 @@ class Transient_Command extends WP_CLI_Command {
 	 * : Get the value of a network|site transient. On single site, this is
 	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
+	 *
+	 * @param string[]              $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function pluck( $args, $assoc_args ) {
 		list( $key ) = $args;
@@ -504,15 +517,14 @@ class Transient_Command extends WP_CLI_Command {
 	 * : Get the value of a network|site transient. On single site, this is
 	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
+	 *
+	 * @param string[]              $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
 
-		/**
-		 * @var string $expiration
-		 */
-		$expiration = Utils\get_flag_value( $assoc_args, 'expiration', 0 );
-		$expiration = (int) $expiration;
+		$expiration = (int) Utils\get_flag_value( $assoc_args, 'expiration', 0 );
 
 		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$write_func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
