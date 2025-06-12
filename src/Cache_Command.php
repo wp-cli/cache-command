@@ -58,11 +58,14 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Add cache.
 	 *     $ wp cache add my_key my_group my_value 300
 	 *     Success: Added object 'my_key' in group 'my_value'.
+	 *
+	 * @param array{string, string, string, string} $args       Positional arguments.
+	 * @param array<mixed>                          $assoc_args Associative arguments.
 	 */
 	public function add( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
 
-		if ( ! wp_cache_add( $key, $value, $group, $expiration ) ) {
+		if ( ! wp_cache_add( $key, $value, $group, (int) $expiration ) ) {
 			WP_CLI::error( "Could not add object '$key' in group '$group'. Does it already exist?" );
 		}
 
@@ -96,10 +99,13 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Decrease cache value.
 	 *     $ wp cache decr my_key 2 my_group
 	 *     48
+	 *
+	 * @param array{string, string, string} $args       Positional arguments.
+	 * @param array<mixed>                  $assoc_args Associative arguments.
 	 */
 	public function decr( $args, $assoc_args ) {
 		list( $key, $offset, $group ) = $args;
-		$value = wp_cache_decr( $key, $offset, $group );
+		$value = wp_cache_decr( $key, (int) $offset, $group );
 
 		if ( false === $value ) {
 			WP_CLI::error( 'The value was not decremented.' );
@@ -129,6 +135,9 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Delete cache.
 	 *     $ wp cache delete my_key my_group
 	 *     Success: Object deleted.
+	 *
+	 * @param array{string, string} $args       Positional arguments.
+	 * @param array<mixed>          $assoc_args Associative arguments.
 	 */
 	public function delete( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
@@ -157,8 +166,9 @@ class Cache_Command extends WP_CLI_Command {
 	 *     $ wp cache flush
 	 *     Success: The cache was flushed.
 	 */
-	public function flush( $args, $assoc_args ) {
-
+	public function flush() {
+		// TODO: Needs fixing in wp-cli/wp-cli
+		// @phpstan-ignore offsetAccess.nonOffsetAccessible
 		if ( WP_CLI::has_config( 'url' ) && ! empty( WP_CLI::get_config()['url'] ) && is_multisite() ) {
 			WP_CLI::warning( 'Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.' );
 		}
@@ -192,6 +202,9 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Get cache.
 	 *     $ wp cache get my_key my_group
 	 *     my_value
+	 *
+	 * @param array{string, string} $args       Positional arguments.
+	 * @param array<mixed>          $assoc_args Associative arguments.
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key, $group ) = $args;
@@ -231,10 +244,13 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Increase cache value.
 	 *     $ wp cache incr my_key 2 my_group
 	 *     50
+	 *
+	 * @param array{string, string, string} $args       Positional arguments.
+	 * @param array<mixed>                  $assoc_args Associative arguments.
 	 */
 	public function incr( $args, $assoc_args ) {
 		list( $key, $offset, $group ) = $args;
-		$value = wp_cache_incr( $key, $offset, $group );
+		$value = wp_cache_incr( $key, (int) $offset, $group );
 
 		if ( false === $value ) {
 			WP_CLI::error( 'The value was not incremented.' );
@@ -273,10 +289,13 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Replace cache.
 	 *     $ wp cache replace my_key new_value my_group
 	 *     Success: Replaced object 'my_key' in group 'my_group'.
+	 *
+	 * @param array{string, string, string, string} $args       Positional arguments.
+	 * @param array<mixed>                          $assoc_args Associative arguments.
 	 */
 	public function replace( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
-		$result = wp_cache_replace( $key, $value, $group, $expiration );
+		$result = wp_cache_replace( $key, $value, $group, (int) $expiration );
 
 		if ( false === $result ) {
 			WP_CLI::error( "Could not replace object '$key' in group '$group'. Does it not exist?" );
@@ -315,10 +334,13 @@ class Cache_Command extends WP_CLI_Command {
 	 *     # Set cache.
 	 *     $ wp cache set my_key my_value my_group 300
 	 *     Success: Set object 'my_key' in group 'my_group'.
+	 *
+	 * @param array{string, string, string, string} $args       Positional arguments.
+	 * @param array<mixed>                          $assoc_args Associative arguments.
 	 */
 	public function set( $args, $assoc_args ) {
 		list( $key, $value, $group, $expiration ) = $args;
-		$result = wp_cache_set( $key, $value, $group, $expiration );
+		$result = wp_cache_set( $key, $value, $group, (int) $expiration );
 
 		if ( false === $result ) {
 			WP_CLI::error( "Could not add object '$key' in group '$group'." );
@@ -341,7 +363,7 @@ class Cache_Command extends WP_CLI_Command {
 	 *     $ wp cache type
 	 *     Default
 	 */
-	public function type( $args, $assoc_args ) {
+	public function type() {
 		$message = WP_CLI\Utils\wp_get_cache_type();
 		WP_CLI::line( $message );
 	}
@@ -365,8 +387,10 @@ class Cache_Command extends WP_CLI_Command {
 	 *     if ! wp cache supports non_existing; then
 	 *         echo 'non_existing is not supported'
 	 *     fi
+	 *
+	 * @param array{string} $args Positional arguments.
 	 */
-	public function supports( $args, $assoc_args ) {
+	public function supports( $args ) {
 		list ( $feature ) = $args;
 
 		if ( ! function_exists( 'wp_cache_supports' ) ) {
@@ -396,8 +420,10 @@ class Cache_Command extends WP_CLI_Command {
 	 *     Success: Cache group 'my_group' was flushed.
 	 *
 	 * @subcommand flush-group
+	 *
+	 * @param array{string} $args Positional arguments.
 	 */
-	public function flush_group( $args, $assoc_args ) {
+	public function flush_group( $args ) {
 		list( $group ) = $args;
 
 		if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
@@ -436,10 +462,14 @@ class Cache_Command extends WP_CLI_Command {
 	 *   - json
 	 *   - yaml
 	 * ---
+	 *
+	 * @param array{string, string}                $args       Positional arguments.
+	 * @param array{group: string, format: string} $assoc_args Associative arguments.
 	 */
 	public function pluck( $args, $assoc_args ) {
 		list( $key ) = $args;
-		$group       = Utils\get_flag_value( $assoc_args, 'group' );
+
+		$group = Utils\get_flag_value( $assoc_args, 'group' );
 
 		$value = wp_cache_get( $key, $group );
 
@@ -512,11 +542,16 @@ class Cache_Command extends WP_CLI_Command {
 	 *   - plaintext
 	 *   - json
 	 * ---
+	 *
+	 * @param string[]                                                 $args       Positional arguments.
+	 * @param array{group: string, expiration: string, format: string} $assoc_args Associative arguments.
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$group                = Utils\get_flag_value( $assoc_args, 'group' );
-		$expiration           = Utils\get_flag_value( $assoc_args, 'expiration' );
+
+		$group = Utils\get_flag_value( $assoc_args, 'group' );
+
+		$expiration = Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map(
 			function ( $key ) {
@@ -569,7 +604,7 @@ class Cache_Command extends WP_CLI_Command {
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
 		} else {
-			$success = wp_cache_set( $key, $patched_value, $group, $expiration );
+			$success = wp_cache_set( $key, $patched_value, $group, (int) $expiration );
 			if ( $success ) {
 				WP_CLI::success( "Updated cache key '$key'." );
 			} else {
