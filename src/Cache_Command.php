@@ -469,9 +469,6 @@ class Cache_Command extends WP_CLI_Command {
 	public function pluck( $args, $assoc_args ) {
 		list( $key ) = $args;
 
-		/**
-		 * @var string $group
-		 */
 		$group = Utils\get_flag_value( $assoc_args, 'group' );
 
 		$value = wp_cache_get( $key, $group );
@@ -552,14 +549,8 @@ class Cache_Command extends WP_CLI_Command {
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
 
-		/**
-		 * @var string $group
-		 */
 		$group = Utils\get_flag_value( $assoc_args, 'group' );
 
-		/**
-		 * @var string|null $expiration
-		 */
 		$expiration = Utils\get_flag_value( $assoc_args, 'expiration' );
 
 		$key_path = array_map(
