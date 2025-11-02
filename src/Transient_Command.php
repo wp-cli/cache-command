@@ -36,6 +36,10 @@ use WP_CLI\Utils;
  *     # Delete all transients.
  *     $ wp transient delete --all
  *     Success: 14 transients deleted from the database.
+ *
+ *     # Delete all site transients.
+ *     $ wp transient delete --all --network
+ *     Success: 2 transients deleted from the database.
  */
 class Transient_Command extends WP_CLI_Command {
 
@@ -73,6 +77,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     $ wp transient get random_key
 	 *     Warning: Transient with key "random_key" is not set.
+	 *
+	 * @param array{string}         $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function get( $args, $assoc_args ) {
 		list( $key ) = $args;
@@ -116,14 +123,17 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     $ wp transient set sample_key "test data" 3600
 	 *     Success: Transient added.
+	 *
+	 * @param array{0: string, 1: string, 2?: string} $args       Positional arguments.
+	 * @param array{network?: bool}                   $assoc_args Associative arguments.
 	 */
 	public function set( $args, $assoc_args ) {
 		list( $key, $value ) = $args;
 
-		$expiration = Utils\get_flag_value( $args, 2, 0 );
+		$expiration = $args[2] ?? 0;
 
 		$func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
-		if ( $func( $key, $value, $expiration ) ) {
+		if ( $func( $key, $value, (int) $expiration ) ) {
 			WP_CLI::success( 'Transient added.' );
 		} else {
 			WP_CLI::error( 'Transient could not be set.' );
@@ -176,6 +186,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 *     # Delete all transients in a multisite.
 	 *     $ wp transient delete --all --network && wp site list --field=url | xargs -n1 -I % wp --url=% transient delete --all
+	 *
+	 * @param array{string}                                     $args       Positional arguments.
+	 * @param array{network?: bool, all?: bool, expired?: bool} $assoc_args Associative arguments.
 	 */
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : null;
@@ -293,6 +306,9 @@ class Transient_Command extends WP_CLI_Command {
 	*      +------+-------+---------------+
 	 *
 	 * @subcommand list
+	 *
+	 * @param string[] $args Positional arguments. Unused.
+	 * @param array{search?: string,  exclude?: string, network?: bool, unserialize?: bool, 'human-readable'?: bool, fields?: string, format?: string} $assoc_args Associative arguments.
 	 */
 	public function list_( $args, $assoc_args ) {
 		global $wpdb;
@@ -430,6 +446,9 @@ class Transient_Command extends WP_CLI_Command {
 	 * : Get the value of a network|site transient. On single site, this is
 	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
+	 *
+	 * @param string[]              $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function pluck( $args, $assoc_args ) {
 		list( $key ) = $args;
@@ -505,10 +524,14 @@ class Transient_Command extends WP_CLI_Command {
 	 * : Get the value of a network|site transient. On single site, this is
 	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
+	 *
+	 * @param string[]              $args       Positional arguments.
+	 * @param array{format: string} $assoc_args Associative arguments.
 	 */
 	public function patch( $args, $assoc_args ) {
 		list( $action, $key ) = $args;
-		$expiration           = (int) Utils\get_flag_value( $assoc_args, 'expiration' );
+
+		$expiration = (int) Utils\get_flag_value( $assoc_args, 'expiration', 0 );
 
 		$read_func  = Utils\get_flag_value( $assoc_args, 'network' ) ? 'get_site_transient' : 'get_transient';
 		$write_func = Utils\get_flag_value( $assoc_args, 'network' ) ? 'set_site_transient' : 'set_transient';
@@ -585,20 +608,31 @@ class Transient_Command extends WP_CLI_Command {
 	private function get_transient_expiration( $name, $is_site_transient = false, $human_readable = false ) {
 		if ( $is_site_transient ) {
 			if ( is_multisite() ) {
-				$expiration = (int) get_site_option( '_site_transient_timeout_' . $name );
+				/**
+				 * @var string $expiration
+				 */
+				$expiration = get_site_option( '_site_transient_timeout_' . $name );
 			} else {
-				$expiration = (int) get_option( '_site_transient_timeout_' . $name );
+				/**
+				 * @var string $expiration
+				 */
+				$expiration = get_option( '_site_transient_timeout_' . $name );
 			}
 		} else {
-			$expiration = (int) get_option( '_transient_timeout_' . $name );
+			/**
+			 * @var string $expiration
+			 */
+			$expiration = get_option( '_transient_timeout_' . $name );
 		}
+
+		$expiration = (int) $expiration;
 
 		if ( 0 === $expiration ) {
 			return $human_readable ? 'never expires' : 'false';
 		}
 
 		if ( ! $human_readable ) {
-			return $expiration;
+			return (string) $expiration;
 		}
 
 		$now = time();
