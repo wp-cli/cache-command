@@ -254,7 +254,7 @@ Errors if the value can't be incremented.
 Update a nested value from the cache.
 
 ~~~
-wp cache patch <action> <key> <key-path>... [<value>] [--group=<group>] [--format=<format>]
+wp cache patch <action> <key> <key-path>... [<value>] [--group=<group>] [--expiration=<expiration>] [--format=<format>]
 ~~~
 
 **OPTIONS**
@@ -283,11 +283,11 @@ wp cache patch <action> <key> <key-path>... [<value>] [--group=<group>] [--forma
 		default: default
 		---
 
-[--expiration=<expiration>]
- : Define how long to keep the value, in seconds. `0` means as long as possible.
- ---
- default: 0
- ---
+	[--expiration=<expiration>]
+		Define how long to keep the value, in seconds. `0` means as long as possible.
+		---
+		default: 0
+		---
 
 	[--format=<format>]
 		The serialization format for the value.
@@ -703,6 +703,9 @@ wp transient patch <action> <key> <key-path>... [<value>] [--format=<format>] [-
 
 	[--expiration=<expiration>]
 		Time until expiration, in seconds.
+		---
+		default: 0
+		---
 
 	[--network]
 		Get the value of a network|site transient. On single site, this is
