@@ -604,7 +604,7 @@ class Cache_Command extends WP_CLI_Command {
 		if ( $patched_value === $old_value ) {
 			WP_CLI::success( "Value passed for cache key '$key' is unchanged." );
 		} else {
-			$success = wp_cache_set( $key, $patched_value, $group, (int) $expiration );
+			$success = wp_cache_set( $key, $patched_value, $group, $expiration );
 			if ( $success ) {
 				WP_CLI::success( "Updated cache key '$key'." );
 			} else {
