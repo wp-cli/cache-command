@@ -516,6 +516,9 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--expiration=<expiration>]
 	 * : Time until expiration, in seconds.
+	 * ---
+	 * default: 0
+	 * ---
 	 *
 	 * [--network]
 	 * : Get the value of a network|site transient. On single site, this is

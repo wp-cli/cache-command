@@ -26,6 +26,18 @@ Feature: Pluck command available for the object cache
       baz
       """
 
+    When I run `wp cache pluck my_key_2 foo bar --format=json`
+    Then STDOUT should be:
+      """
+      "baz"
+      """
+
+    When I run `wp cache pluck my_key_2 foo --format=json`
+    Then STDOUT should be:
+      """
+      {"bar":"baz"}
+      """
+
     When I run `wp cache pluck my_key_3 foo --group=my_custom_group`
     Then STDOUT should be:
       """
