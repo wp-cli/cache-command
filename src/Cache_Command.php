@@ -10,7 +10,7 @@ use WP_CLI\Utils;
  * request (and is emptied at the end). Use a persistent object cache drop-in
  * to persist the object cache between requests.
  *
- * [Read the codex article](https://codex.wordpress.org/Class_Reference/WP_Object_Cache)
+ * [Read the documentation](https://developer.wordpress.org/reference/classes/wp_object_cache)
  * for more detail.
  *
  * ## EXAMPLES
