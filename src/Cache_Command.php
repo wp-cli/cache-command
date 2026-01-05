@@ -364,7 +364,35 @@ class Cache_Command extends WP_CLI_Command {
 	 *     Default
 	 */
 	public function type() {
+		global $wp_object_cache;
+
 		$message = WP_CLI\Utils\wp_get_cache_type();
+
+		// If the base detection returns "Unknown", try additional checks.
+		if ( 'Unknown' === $message ) {
+			// Check for WP-Stash (https://github.com/inpsyde/WP-Stash).
+			if ( class_exists( 'Inpsyde\WpStash\WpStash' ) ) {
+				try {
+					$stash_instance = \Inpsyde\WpStash\WpStash::instance();
+					if ( is_object( $stash_instance ) && method_exists( $stash_instance, 'driver' ) ) {
+						$driver = $stash_instance->driver();
+						if ( is_object( $driver ) ) {
+							$message = 'WP-Stash (' . get_class( $driver ) . ')';
+						} else {
+							$message = 'WP-Stash';
+						}
+					} else {
+						$message = 'WP-Stash';
+					}
+				} catch ( \Exception $e ) {
+					$message = 'WP-Stash';
+				}
+			} elseif ( is_object( $wp_object_cache ) ) {
+				// Provide a generic fallback for custom cache implementations.
+				$message = 'Unknown: ' . get_class( $wp_object_cache );
+			}
+		}
+
 		WP_CLI::line( $message );
 	}
 

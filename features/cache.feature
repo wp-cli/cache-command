@@ -210,3 +210,74 @@ Feature: Managed the WordPress object cache
 
     When I run `wp cache supports set_multiple`
     Then the return code should be 0
+
+  Scenario: Detecting default cache type
+    Given a WP install
+
+    When I run `wp cache type`
+    Then STDOUT should be:
+      """
+      Default
+      """
+
+  Scenario: Detecting WP-Stash cache with driver information
+    Given a WP install
+    And a wp-content/object-cache.php file:
+      """
+      <?php
+      // Mock WP-Stash implementation for testing
+      namespace Inpsyde\WpStash {
+        class WpStash {
+          private static $instance;
+          private $driver;
+          
+          public static function instance() {
+            if ( ! self::$instance ) {
+              self::$instance = new self();
+            }
+            return self::$instance;
+          }
+          
+          public function __construct() {
+            $this->driver = new \MockStashDriver();
+          }
+          
+          public function driver() {
+            return $this->driver;
+          }
+        }
+      }
+      
+      class MockStashDriver {
+      }
+      
+      // Set up a persistent object cache to trigger "Unknown" detection
+      global $_wp_using_ext_object_cache;
+      $_wp_using_ext_object_cache = true;
+      """
+
+    When I run `wp cache type`
+    Then STDOUT should contain:
+      """
+      WP-Stash (MockStashDriver)
+      """
+
+  Scenario: Generic fallback for custom cache implementations
+    Given a WP install
+    And a wp-content/object-cache.php file:
+      """
+      <?php
+      // Custom object cache implementation for testing
+      class Custom_Object_Cache extends WP_Object_Cache {
+      }
+      
+      global $wp_object_cache, $_wp_using_ext_object_cache;
+      $wp_object_cache = new Custom_Object_Cache();
+      $_wp_using_ext_object_cache = true;
+      """
+
+    When I run `wp cache type`
+    Then STDOUT should be:
+      """
+      Unknown: Custom_Object_Cache
+      """
