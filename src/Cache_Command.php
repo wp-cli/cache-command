@@ -384,7 +384,7 @@ class Cache_Command extends WP_CLI_Command {
 					} else {
 						$message = 'WP-Stash';
 					}
-				} catch ( \Exception $e ) {
+				} catch ( \Throwable $e ) {
 					$message = 'WP-Stash';
 				}
 			} elseif ( is_object( $wp_object_cache ) ) {

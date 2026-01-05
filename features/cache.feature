@@ -251,7 +251,7 @@ Feature: Managed the WordPress object cache
       class MockStashDriver {
       }
       
-      // Set up a persistent object cache to trigger "Unknown" detection
+      // Set up as external cache so base detection returns "Unknown" and triggers extended detection
       global $_wp_using_ext_object_cache;
       $_wp_using_ext_object_cache = true;
       """
