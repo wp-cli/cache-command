@@ -72,8 +72,8 @@ be added.
 **EXAMPLES**
 
     # Add cache.
-    $ wp cache add my_key my_group my_value 300
-    Success: Added object 'my_key' in group 'my_value'.
+    $ wp cache add my_key my_value my_group 300
+    Success: Added object 'my_key' in group 'my_group'.
 
 
 
