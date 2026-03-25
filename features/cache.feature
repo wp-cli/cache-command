@@ -1,5 +1,6 @@
 Feature: Managed the WordPress object cache
 
+  @skip-object-cache
   Scenario: Default group is 'default'
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -210,3 +211,14 @@ Feature: Managed the WordPress object cache
 
     When I run `wp cache supports set_multiple`
     Then the return code should be 0
+
+  @require-object-cache
+  Scenario: Object caches may return success when deleting non-existent objects
+    Given a WP install
+
+    When I run `wp cache delete nonexistentkey`
+    Then STDOUT should be:
+      """
+      Success: Object deleted.
+      """
+    And the return code should be 0

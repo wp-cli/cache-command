@@ -55,6 +55,7 @@ Feature: Manage WordPress transient cache
       Success: Transient deleted.
       """
 
+  @skip-object-cache
   Scenario: Deleting all transients on single site
     Given a WP install
     # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
@@ -125,6 +126,7 @@ Feature: Manage WordPress transient cache
       Warning: Transient with key "foo4" is not set.
       """
 
+  @skip-object-cache
   Scenario: Deleting expired transients on single site
     Given a WP install
     And I run `wp transient set foo bar 600`
@@ -196,6 +198,7 @@ Feature: Manage WordPress transient cache
       bar4
       """
 
+  @skip-object-cache
   Scenario: Deleting all transients on multisite
     Given a WP multisite install
     # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
@@ -291,6 +294,7 @@ Feature: Manage WordPress transient cache
       Warning: Transient with key "foo6" is not set.
       """
 
+  @skip-object-cache
   Scenario: Deleting expired transients on multisite
     Given a WP multisite install
     And I run `wp site create --slug=foo`
@@ -391,6 +395,7 @@ Feature: Manage WordPress transient cache
       bar6
       """
 
+  @skip-object-cache
   Scenario: List transients on single site
     Given a WP install
     And I run `wp transient set foo bar`
@@ -446,6 +451,7 @@ Feature: Manage WordPress transient cache
       foo6,bar6,1321009871
       """
 
+  @skip-object-cache
   Scenario: List transients on multisite
     Given a WP multisite install
     # We set `WP_DEVELOPMENT_MODE` to stop WordPress from automatically creating
@@ -504,6 +510,7 @@ Feature: Manage WordPress transient cache
       foo6,bar6,1321009871
       """
 
+  @skip-object-cache
   Scenario: List transients with search and exclude pattern
     Given a WP install
     And I run `wp transient set foo bar`
@@ -603,3 +610,40 @@ Feature: Manage WordPress transient cache
       name
       foo4
       """
+
+  @require-object-cache
+  Scenario: Transient database operations warn when external object cache is active
+    Given a WP install
+
+    When I try `wp transient list --format=count`
+    Then STDERR should be:
+      """
+      Warning: Transients are stored in an external object cache, and this command only shows those stored in the database.
+      """
+    And STDOUT should be:
+      """
+      0
+      """
+    And the return code should be 0
+
+    When I try `wp transient delete --all`
+    Then STDERR should be:
+      """
+      Warning: Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.
+      """
+    And STDOUT should be:
+      """
+      Success: No transients found.
+      """
+    And the return code should be 0
+
+    When I try `wp transient delete --expired`
+    Then STDERR should be:
+      """
+      Warning: Transients are stored in an external object cache, and this command only deletes those stored in the database. You must flush the cache to delete all transients.
+      """
+    And STDOUT should be:
+      """
+      Success: No expired transients found.
+      """
+    And the return code should be 0

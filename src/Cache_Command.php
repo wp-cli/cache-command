@@ -168,7 +168,6 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function flush() {
 		// TODO: Needs fixing in wp-cli/wp-cli
-		// @phpstan-ignore offsetAccess.nonOffsetAccessible
 		if ( WP_CLI::has_config( 'url' ) && ! empty( WP_CLI::get_config()['url'] ) && is_multisite() ) {
 			WP_CLI::warning( 'Flushing the cache may affect all sites in a multisite installation, depending on the implementation of the object cache.' );
 		}
@@ -574,7 +573,7 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! empty( $stdin_value ) ) {
 				$patch_value = WP_CLI::read_value( $stdin_value, $assoc_args );
 			} elseif ( count( $key_path ) > 1 ) {
-				$patch_value = WP_CLI::read_value( array_pop( $key_path ), $assoc_args );
+				$patch_value = WP_CLI::read_value( (string) array_pop( $key_path ), $assoc_args );
 			} else {
 				$patch_value = null;
 			}
