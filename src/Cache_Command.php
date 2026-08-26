@@ -425,7 +425,7 @@ class Cache_Command extends WP_CLI_Command {
 	public function flush_group( $args ) {
 		list( $group ) = $args;
 
-		if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+		if ( ! function_exists( 'wp_cache_supports' ) || ! function_exists( 'wp_cache_flush_group' ) || ! wp_cache_supports( 'flush_group' ) ) {
 			WP_CLI::error( 'Group flushing is not supported.' );
 		}
 
