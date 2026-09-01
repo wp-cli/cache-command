@@ -4,7 +4,7 @@ Feature: Managed the WordPress object cache
   Scenario: Default group is 'default'
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
-      """
+      """php
       <?php
       $set_foo = function () {
           wp_cache_set( 'foo', 'bar' );
