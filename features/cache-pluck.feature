@@ -5,10 +5,10 @@ Feature: Pluck command available for the object cache
     And a wp-content/mu-plugins/test-harness.php file:
       """php
       <?php
-      $set_foo = function(){
-        wp_cache_set( 'my_key', ['foo' => 'bar'] );
-        wp_cache_set( 'my_key_2', ['foo' => ['bar' => 'baz']] );
-        wp_cache_set( 'my_key_3', ['foo' => 'bar_custom'], 'my_custom_group' );
+      $set_foo = function () {
+          wp_cache_set( 'my_key', [ 'foo' => 'bar' ] );
+          wp_cache_set( 'my_key_2', [ 'foo' => [ 'bar' => 'baz' ] ] );
+          wp_cache_set( 'my_key_3', [ 'foo' => 'bar_custom' ], 'my_custom_group' );
       };
 
       WP_CLI::add_hook( 'before_invoke:cache pluck', $set_foo );
