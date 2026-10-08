@@ -193,9 +193,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : null;
 
-		$all     = Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
-		$network = Utils\get_flag_value( $assoc_args, 'network' );
+		$all     = Utils\get_flag_value( $assoc_args, 'all', false );
+		$expired = Utils\get_flag_value( $assoc_args, 'expired', false );
+		$network = Utils\get_flag_value( $assoc_args, 'network', false );
 
 		if ( true === $all ) {
 			$this->delete_all( $network );
