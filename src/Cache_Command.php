@@ -611,4 +611,221 @@ class Cache_Command extends WP_CLI_Command {
 			}
 		}
 	}
+
+	/**
+	 * Clears post related caches.
+	 *
+	 * @subcommand flush-post
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<id>]
+	 * : Post ID. If not specified, clears all post caches.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear all post caches.
+	 *     $ wp cache flush-post
+	 *     Success: Post caches cleared.
+	 *
+	 *     # Clear cache for a specific post.
+	 *     $ wp cache flush-post 123
+	 *     Success: Post cache for ID 123 cleared.
+	 *
+	 * @param array<string> $args Positional arguments.
+	 */
+	public function flush_post( $args ) {
+		if ( ! empty( $args ) ) {
+			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
+				WP_CLI::error( 'Please provide a valid post ID.' );
+			}
+			$post_id = (int) $args[0];
+			clean_post_cache( $post_id );
+			WP_CLI::success( "Post cache for ID $post_id cleared." );
+		} else {
+			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+				WP_CLI::error( 'Flushing all post caches requires WordPress 6.1+' );
+			}
+			$posts_flushed = wp_cache_flush_group( 'posts' );
+			$post_meta_flushed = wp_cache_flush_group( 'post_meta' );
+			if ( ! $posts_flushed || ! $post_meta_flushed ) {
+				WP_CLI::error( 'Failed to flush post caches.' );
+			}
+			WP_CLI::success( 'Post caches cleared.' );
+		}
+	}
+
+	/**
+	 * Clears term related caches.
+	 *
+	 * @subcommand flush-term
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<id>]
+	 * : Term ID. If not specified, clears all term caches.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear all term caches.
+	 *     $ wp cache flush-term
+	 *     Success: Term caches cleared.
+	 *
+	 *     # Clear cache for a specific term.
+	 *     $ wp cache flush-term 5
+	 *     Success: Term cache for ID 5 cleared.
+	 *
+	 * @param array<string> $args Positional arguments.
+	 */
+	public function flush_term( $args ) {
+		if ( ! empty( $args ) ) {
+			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
+				WP_CLI::error( 'Please provide a valid term ID.' );
+			}
+			$term_id = (int) $args[0];
+			$term = get_term( $term_id );
+			$taxonomy = ( $term && ! is_wp_error( $term ) ) ? $term->taxonomy : '';
+			clean_term_cache( $term_id, $taxonomy );
+			wp_cache_delete( $term_id, 'term_meta' );
+			WP_CLI::success( "Term cache for ID $term_id cleared." );
+		} else {
+			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+				WP_CLI::error( 'Flushing all term caches requires WordPress 6.1+' );
+			}
+			$terms_flushed = wp_cache_flush_group( 'terms' );
+			$term_meta_flushed = wp_cache_flush_group( 'term_meta' );
+			if ( ! $terms_flushed || ! $term_meta_flushed ) {
+				WP_CLI::error( 'Failed to flush term caches.' );
+			}
+			WP_CLI::success( 'Term caches cleared.' );
+		}
+	}
+
+	/**
+	 * Clears comment related caches.
+	 *
+	 * @subcommand flush-comment
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<id>]
+	 * : Comment ID. If not specified, clears all comment caches.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear all comment caches.
+	 *     $ wp cache flush-comment
+	 *     Success: Comment caches cleared.
+	 *
+	 *     # Clear cache for a specific comment.
+	 *     $ wp cache flush-comment 42
+	 *     Success: Comment cache for ID 42 cleared.
+	 *
+	 * @param array<string> $args Positional arguments.
+	 */
+	public function flush_comment( $args ) {
+		if ( ! empty( $args ) ) {
+			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
+				WP_CLI::error( 'Please provide a valid comment ID.' );
+			}
+			$comment_id = (int) $args[0];
+			clean_comment_cache( $comment_id );
+			wp_cache_delete( $comment_id, 'comment_meta' );
+			WP_CLI::success( "Comment cache for ID $comment_id cleared." );
+		} else {
+			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+				WP_CLI::error( 'Flushing all comment caches requires WordPress 6.1+' );
+			}
+			$comment_flushed = wp_cache_flush_group( 'comment' );
+			$comment_meta_flushed = wp_cache_flush_group( 'comment_meta' );
+			if ( ! $comment_flushed || ! $comment_meta_flushed ) {
+				WP_CLI::error( 'Failed to flush comment caches.' );
+			}
+			WP_CLI::success( 'Comment caches cleared.' );
+		}
+	}
+
+	/**
+	 * Clears user related caches.
+	 *
+	 * @subcommand flush-user
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<id>]
+	 * : User ID. If not specified, clears all user caches.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear all user caches.
+	 *     $ wp cache flush-user
+	 *     Success: User caches cleared.
+	 *
+	 *     # Clear cache for a specific user.
+	 *     $ wp cache flush-user 1
+	 *     Success: User cache for ID 1 cleared.
+	 *
+	 * @param array<string> $args Positional arguments.
+	 */
+	public function flush_user( $args ) {
+		if ( ! empty( $args ) ) {
+			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
+				WP_CLI::error( 'Please provide a valid user ID.' );
+			}
+			$user_id = (int) $args[0];
+			clean_user_cache( $user_id );
+			wp_cache_delete( $user_id, 'user_meta' );
+			WP_CLI::success( "User cache for ID $user_id cleared." );
+		} else {
+			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+				WP_CLI::error( 'Flushing all user caches requires WordPress 6.1+' );
+			}
+			$users_flushed = wp_cache_flush_group( 'users' );
+			$user_meta_flushed = wp_cache_flush_group( 'user_meta' );
+			if ( ! $users_flushed || ! $user_meta_flushed ) {
+				WP_CLI::error( 'Failed to flush user caches.' );
+			}
+			WP_CLI::success( 'User caches cleared.' );
+		}
+	}
+
+	/**
+	 * Clears option related caches.
+	 *
+	 * @subcommand flush-option
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<name>]
+	 * : Option name. If not specified, clears all option caches.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Clear all option caches.
+	 *     $ wp cache flush-option
+	 *     Success: Option caches cleared.
+	 *
+	 *     # Clear cache for a specific option.
+	 *     $ wp cache flush-option my_option
+	 *     Success: Option cache for 'my_option' cleared.
+	 *
+	 * @param array<string> $args Positional arguments.
+	 */
+	public function flush_option( $args ) {
+		if ( ! empty( $args ) ) {
+			$option_name = $args[0];
+			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( $option_name, 'options' );
+			WP_CLI::success( "Option cache for '$option_name' cleared." );
+		} else {
+			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
+				WP_CLI::error( 'Flushing all option caches requires WordPress 6.1+' );
+			}
+			$options_flushed = wp_cache_flush_group( 'options' );
+			if ( ! $options_flushed ) {
+				WP_CLI::error( 'Failed to flush option caches.' );
+			}
+			WP_CLI::success( 'Option caches cleared.' );
+		}
+	}
 }
