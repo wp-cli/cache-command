@@ -223,14 +223,14 @@ Feature: Manage WordPress transient cache
       """
 
     Given these setup commands:
-      | command                                                        |
-      | wp transient set foo bar                                       |
-      | wp transient set foo2 bar2 600                                 |
-      | wp transient set foo3 bar3 --network                           |
-      | wp transient set foo4 bar4 600 --network                       |
-      | wp --url=example.com/foo transient set foo5 bar5 --network     |
-      | wp --url=example.com/foo transient set foo6 bar6 600 --network |
-    When I run `wp transient delete --all`
+      | command                                  |
+      | wp transient set foo bar                 |
+      | wp transient set foo2 bar2 600           |
+      | wp transient set foo3 bar3 --network     |
+      | wp transient set foo4 bar4 600 --network |
+    When I run `wp --url=example.com/foo transient set foo5 bar5 --network`
+    And I run `wp --url=example.com/foo transient set foo6 bar6 600 --network`
+    And I run `wp transient delete --all`
     Then STDOUT should be:
       """
       Success: {EXPECTED_TRANSIENTS} transients deleted from the database.
@@ -307,19 +307,19 @@ Feature: Manage WordPress transient cache
     Given a WP multisite install
     And I run `wp site create --slug=foo`
     And these setup commands:
-      | command                                                        |
-      | wp transient set foo bar 600                                   |
-      | wp transient set foo2 bar2 600                                 |
-      | wp transient set foo3 bar3 600 --network                       |
-      | wp transient set foo4 bar4 600 --network                       |
-      | wp --url=example.com/foo transient set foo5 bar5 600 --network |
-      | wp --url=example.com/foo transient set foo6 bar6 600 --network |
+      | command                                  |
+      | wp transient set foo bar 600             |
+      | wp transient set foo2 bar2 600           |
+      | wp transient set foo3 bar3 600 --network |
+      | wp transient set foo4 bar4 600 --network |
+    And I run `wp --url=example.com/foo transient set foo5 bar5 600 --network`
+    And I run `wp --url=example.com/foo transient set foo6 bar6 600 --network`
     # Change timeout to be in the past.
     And these setup commands:
-      | command                                                                             |
-      | wp option update _transient_timeout_foo 1321009871                                  |
-      | wp site option update _site_transient_timeout_foo3 1321009871                       |
-      | wp --url=example.com/foo site option update _site_transient_timeout_foo5 1321009871 |
+      | command                                                       |
+      | wp option update _transient_timeout_foo 1321009871            |
+      | wp site option update _site_transient_timeout_foo3 1321009871 |
+    And I run `wp --url=example.com/foo site option update _site_transient_timeout_foo5 1321009871`
 
     When I run `wp transient delete --expired`
     Then STDOUT should be:
