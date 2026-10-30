@@ -134,8 +134,10 @@ Feature: Manage WordPress transient cache
     And I run `wp transient set foo3 bar3 600 --network`
     And I run `wp transient set foo4 bar4 600 --network`
     # Change timeout to be in the past.
-    And I run `wp option update _transient_timeout_foo 1321009871`
-    And I run `wp option update _site_transient_timeout_foo3 1321009871`
+    And these options:
+      | name                         | value      |
+      | _transient_timeout_foo       | 1321009871 |
+      | _site_transient_timeout_foo3 | 1321009871 |
 
     When I run `wp transient delete --expired`
     Then STDOUT should be:
