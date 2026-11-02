@@ -2,8 +2,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from transient can be inserted at any depth.
     Given a WP install
-    And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                             |
+      | wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch insert my_key fuz baz`
     Then STDOUT should be:
@@ -73,8 +75,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from transient can be updated at any depth.
     Given a WP install
-    And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                             |
+      | wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch update my_key foo baz`
     Then STDOUT should be:
@@ -132,8 +136,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from transient can be deleted at any depth.
     Given a WP install
-    And I run `wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                             |
+      | wp eval "set_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch delete my_key foo`
     Then STDOUT should be:
@@ -179,8 +185,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from site transient can be inserted at any depth.
     Given a WP multisite install
-    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                                  |
+      | wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch insert my_key fuz baz --network`
     Then STDOUT should be:
@@ -238,8 +246,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from site transient can be updated at any depth.
     Given a WP multisite install
-    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                                  |
+      | wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch update my_key foo baz --network`
     Then STDOUT should be:
@@ -297,8 +307,10 @@ Feature: Patch command available for the transient cache
 
   Scenario: Nested values from site transient can be deleted at any depth.
     Given a WP multisite install
-    And I run `wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"`
-    And I run `wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );"`
+    And these setup commands:
+      | command                                                                  |
+      | wp eval "set_site_transient( 'my_key', ['foo' => 'bar'] );"              |
+      | wp eval "set_site_transient( 'my_key_2', ['foo' => ['bar' => 'baz']] );" |
 
     When I run `wp transient patch delete my_key foo --network`
     Then STDOUT should be:
