@@ -643,14 +643,11 @@ class Cache_Command extends WP_CLI_Command {
 			clean_post_cache( $post_id );
 			WP_CLI::success( "Post cache for ID $post_id cleared." );
 		} else {
-			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
-				WP_CLI::error( 'Flushing all post caches requires WordPress 6.1+' );
+			$groups = array( 'posts', 'post_meta' );
+			foreach ( get_taxonomies() as $taxonomy ) {
+				$groups[] = "{$taxonomy}_relationships";
 			}
-			$posts_flushed     = wp_cache_flush_group( 'posts' );
-			$post_meta_flushed = wp_cache_flush_group( 'post_meta' );
-			if ( ! $posts_flushed || ! $post_meta_flushed ) {
-				WP_CLI::error( 'Failed to flush post caches.' );
-			}
+			$this->flush_cache_groups( 'post', $groups );
 			WP_CLI::success( 'Post caches cleared.' );
 		}
 	}
@@ -689,13 +686,10 @@ class Cache_Command extends WP_CLI_Command {
 			wp_cache_delete( $term_id, 'term_meta' );
 			WP_CLI::success( "Term cache for ID $term_id cleared." );
 		} else {
-			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
-				WP_CLI::error( 'Flushing all term caches requires WordPress 6.1+' );
-			}
-			$terms_flushed     = wp_cache_flush_group( 'terms' );
-			$term_meta_flushed = wp_cache_flush_group( 'term_meta' );
-			if ( ! $terms_flushed || ! $term_meta_flushed ) {
-				WP_CLI::error( 'Failed to flush term caches.' );
+			$this->flush_cache_groups( 'term', array( 'terms', 'term_meta' ) );
+			// Hierarchies are stored in the `{$taxonomy}_children` option, not in a term cache group.
+			foreach ( get_taxonomies() as $taxonomy ) {
+				clean_taxonomy_cache( $taxonomy );
 			}
 			WP_CLI::success( 'Term caches cleared.' );
 		}
@@ -733,14 +727,7 @@ class Cache_Command extends WP_CLI_Command {
 			wp_cache_delete( $comment_id, 'comment_meta' );
 			WP_CLI::success( "Comment cache for ID $comment_id cleared." );
 		} else {
-			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
-				WP_CLI::error( 'Flushing all comment caches requires WordPress 6.1+' );
-			}
-			$comment_flushed      = wp_cache_flush_group( 'comment' );
-			$comment_meta_flushed = wp_cache_flush_group( 'comment_meta' );
-			if ( ! $comment_flushed || ! $comment_meta_flushed ) {
-				WP_CLI::error( 'Failed to flush comment caches.' );
-			}
+			$this->flush_cache_groups( 'comment', array( 'comment', 'comment_meta' ) );
 			WP_CLI::success( 'Comment caches cleared.' );
 		}
 	}
@@ -777,14 +764,7 @@ class Cache_Command extends WP_CLI_Command {
 			wp_cache_delete( $user_id, 'user_meta' );
 			WP_CLI::success( "User cache for ID $user_id cleared." );
 		} else {
-			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
-				WP_CLI::error( 'Flushing all user caches requires WordPress 6.1+' );
-			}
-			$users_flushed     = wp_cache_flush_group( 'users' );
-			$user_meta_flushed = wp_cache_flush_group( 'user_meta' );
-			if ( ! $users_flushed || ! $user_meta_flushed ) {
-				WP_CLI::error( 'Failed to flush user caches.' );
-			}
+			$this->flush_cache_groups( 'user', array( 'users', 'user_meta', 'userlogins', 'userslugs', 'useremail' ) );
 			WP_CLI::success( 'User caches cleared.' );
 		}
 	}
@@ -815,17 +795,30 @@ class Cache_Command extends WP_CLI_Command {
 		if ( ! empty( $args ) ) {
 			$option_name = $args[0];
 			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
 			wp_cache_delete( $option_name, 'options' );
 			WP_CLI::success( "Option cache for '$option_name' cleared." );
 		} else {
-			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
-				WP_CLI::error( 'Flushing all option caches requires WordPress 6.1+' );
-			}
-			$options_flushed = wp_cache_flush_group( 'options' );
-			if ( ! $options_flushed ) {
-				WP_CLI::error( 'Failed to flush option caches.' );
-			}
+			$this->flush_cache_groups( 'option', array( 'options' ) );
 			WP_CLI::success( 'Option caches cleared.' );
+		}
+	}
+
+	/**
+	 * Flushes the given cache groups, erroring out if group flushing is unavailable or fails.
+	 *
+	 * @param string        $type   Object type, used in error messages.
+	 * @param array<string> $groups Cache groups to flush.
+	 */
+	private function flush_cache_groups( $type, $groups ) {
+		if ( ! function_exists( 'wp_cache_supports' ) || ! function_exists( 'wp_cache_flush_group' ) || ! wp_cache_supports( 'flush_group' ) ) {
+			WP_CLI::error( "Flushing all {$type} caches requires WordPress 6.1+" );
+		}
+
+		foreach ( $groups as $group ) {
+			if ( ! wp_cache_flush_group( $group ) ) {
+				WP_CLI::error( "Failed to flush {$type} caches." );
+			}
 		}
 	}
 }

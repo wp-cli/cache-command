@@ -144,11 +144,13 @@ Feature: Granular cache flushing operations
       $cache_option = function(){
         wp_cache_set( 'my_option', 'value', 'options' );
         wp_cache_set( 'alloptions', array( 'my_option' => 'value' ), 'options' );
+        wp_cache_set( 'notoptions', array( 'my_option' => true ), 'options' );
       };
       $verify_cache_cleared = function(){
         $option = wp_cache_get( 'my_option', 'options' );
         $alloptions = wp_cache_get( 'alloptions', 'options' );
-        if ( false !== $option || false !== $alloptions ) {
+        $notoptions = wp_cache_get( 'notoptions', 'options' );
+        if ( false !== $option || false !== $alloptions || false !== $notoptions ) {
           WP_CLI::error( 'Cache was not properly cleared.' );
         }
       };
@@ -262,7 +264,7 @@ Feature: Granular cache flushing operations
       | 0  |
       | -1 |
 
-  @require-wp-6-1 @skip-object-cache
+  @require-wp-6.1 @skip-object-cache
   Scenario: Flush all post caches on WordPress 6.1+
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -272,13 +274,15 @@ Feature: Granular cache flushing operations
         wp_cache_set( 'post_1', array( 'ID' => 1 ), 'posts' );
         wp_cache_set( 'post_2', array( 'ID' => 2 ), 'posts' );
         wp_cache_set( 'meta_1', array( 'key' => 'value' ), 'post_meta' );
+        wp_cache_set( 1, array( 1 ), 'category_relationships' );
       };
       $verify_group_cleared = function(){
         if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
           $post1 = wp_cache_get( 'post_1', 'posts' );
           $post2 = wp_cache_get( 'post_2', 'posts' );
           $meta = wp_cache_get( 'meta_1', 'post_meta' );
-          if ( false !== $post1 || false !== $post2 || false !== $meta ) {
+          $rel = wp_cache_get( 1, 'category_relationships' );
+          if ( false !== $post1 || false !== $post2 || false !== $meta || false !== $rel ) {
             WP_CLI::error( 'Group cache was not properly cleared.' );
           }
         }
@@ -293,7 +297,7 @@ Feature: Granular cache flushing operations
       Success: Post caches cleared.
       """
 
-  @require-wp-6-1 @skip-object-cache
+  @require-wp-6.1 @skip-object-cache
   Scenario: Flush all term caches on WordPress 6.1+
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -324,7 +328,7 @@ Feature: Granular cache flushing operations
       Success: Term caches cleared.
       """
 
-  @require-wp-6-1 @skip-object-cache
+  @require-wp-6.1 @skip-object-cache
   Scenario: Flush all comment caches on WordPress 6.1+
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -355,7 +359,7 @@ Feature: Granular cache flushing operations
       Success: Comment caches cleared.
       """
 
-  @require-wp-6-1 @skip-object-cache
+  @require-wp-6.1 @skip-object-cache
   Scenario: Flush all user caches on WordPress 6.1+
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -365,13 +369,21 @@ Feature: Granular cache flushing operations
         wp_cache_set( 'user_1', array( 'ID' => 1 ), 'users' );
         wp_cache_set( 'user_2', array( 'ID' => 2 ), 'users' );
         wp_cache_set( 'meta_1', array(), 'user_meta' );
+        wp_cache_set( 'old@example.com', 1, 'useremail' );
+        wp_cache_set( 'oldlogin', 1, 'userlogins' );
+        wp_cache_set( 'oldslug', 1, 'userslugs' );
       };
       $verify_group_cleared = function(){
         if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
           $user1 = wp_cache_get( 'user_1', 'users' );
           $user2 = wp_cache_get( 'user_2', 'users' );
           $meta = wp_cache_get( 'meta_1', 'user_meta' );
-          if ( false !== $user1 || false !== $user2 || false !== $meta ) {
+          $lookups = array(
+            wp_cache_get( 'old@example.com', 'useremail' ),
+            wp_cache_get( 'oldlogin', 'userlogins' ),
+            wp_cache_get( 'oldslug', 'userslugs' ),
+          );
+          if ( false !== $user1 || false !== $user2 || false !== $meta || array( false, false, false ) !== $lookups ) {
             WP_CLI::error( 'Group cache was not properly cleared.' );
           }
         }
@@ -386,7 +398,7 @@ Feature: Granular cache flushing operations
       Success: User caches cleared.
       """
 
-  @require-wp-6-1 @skip-object-cache
+  @require-wp-6.1 @skip-object-cache
   Scenario: Flush all option caches on WordPress 6.1+
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
@@ -414,3 +426,14 @@ Feature: Granular cache flushing operations
       """
       Success: Option caches cleared.
       """
+
+  @less-than-wp-6.1
+  Scenario: Flushing all post caches requires WordPress 6.1+
+    Given a WP install
+
+    When I try `wp cache flush-post`
+    Then STDERR should be:
+      """
+      Error: Flushing all post caches requires WordPress 6.1+
+      """
+    And the return code should be 1
