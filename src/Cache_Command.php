@@ -646,7 +646,7 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
 				WP_CLI::error( 'Flushing all post caches requires WordPress 6.1+' );
 			}
-			$posts_flushed = wp_cache_flush_group( 'posts' );
+			$posts_flushed     = wp_cache_flush_group( 'posts' );
 			$post_meta_flushed = wp_cache_flush_group( 'post_meta' );
 			if ( ! $posts_flushed || ! $post_meta_flushed ) {
 				WP_CLI::error( 'Failed to flush post caches.' );
@@ -682,8 +682,8 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
 				WP_CLI::error( 'Please provide a valid term ID.' );
 			}
-			$term_id = (int) $args[0];
-			$term = get_term( $term_id );
+			$term_id  = (int) $args[0];
+			$term     = get_term( $term_id );
 			$taxonomy = ( $term && ! is_wp_error( $term ) ) ? $term->taxonomy : '';
 			clean_term_cache( $term_id, $taxonomy );
 			wp_cache_delete( $term_id, 'term_meta' );
@@ -692,7 +692,7 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
 				WP_CLI::error( 'Flushing all term caches requires WordPress 6.1+' );
 			}
-			$terms_flushed = wp_cache_flush_group( 'terms' );
+			$terms_flushed     = wp_cache_flush_group( 'terms' );
 			$term_meta_flushed = wp_cache_flush_group( 'term_meta' );
 			if ( ! $terms_flushed || ! $term_meta_flushed ) {
 				WP_CLI::error( 'Failed to flush term caches.' );
@@ -736,7 +736,7 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
 				WP_CLI::error( 'Flushing all comment caches requires WordPress 6.1+' );
 			}
-			$comment_flushed = wp_cache_flush_group( 'comment' );
+			$comment_flushed      = wp_cache_flush_group( 'comment' );
 			$comment_meta_flushed = wp_cache_flush_group( 'comment_meta' );
 			if ( ! $comment_flushed || ! $comment_meta_flushed ) {
 				WP_CLI::error( 'Failed to flush comment caches.' );
@@ -780,7 +780,7 @@ class Cache_Command extends WP_CLI_Command {
 			if ( ! function_exists( 'wp_cache_supports' ) || ! wp_cache_supports( 'flush_group' ) ) {
 				WP_CLI::error( 'Flushing all user caches requires WordPress 6.1+' );
 			}
-			$users_flushed = wp_cache_flush_group( 'users' );
+			$users_flushed     = wp_cache_flush_group( 'users' );
 			$user_meta_flushed = wp_cache_flush_group( 'user_meta' );
 			if ( ! $users_flushed || ! $user_meta_flushed ) {
 				WP_CLI::error( 'Failed to flush user caches.' );

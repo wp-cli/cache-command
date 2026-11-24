@@ -7,12 +7,16 @@ Feature: Granular cache flushing operations
       """
       <?php
       $cache_post = function(){
-        wp_cache_set( 123, array( 'ID' => 123, 'post_title' => 'Test' ), 'posts' );
-        wp_cache_set( 123, array( 'key' => 'value' ), 'post_meta' );
+        // Prime the caches for the "Hello world!" post created by the install.
+        get_post( 1 );
+        get_post_meta( 1 );
+        if ( false === wp_cache_get( 1, 'posts' ) || false === wp_cache_get( 1, 'post_meta' ) ) {
+          WP_CLI::error( 'Cache was not primed.' );
+        }
       };
       $verify_cache_cleared = function(){
-        $post = wp_cache_get( 123, 'posts' );
-        $meta = wp_cache_get( 123, 'post_meta' );
+        $post = wp_cache_get( 1, 'posts' );
+        $meta = wp_cache_get( 1, 'post_meta' );
         if ( false !== $post || false !== $meta ) {
           WP_CLI::error( 'Cache was not properly cleared.' );
         }
@@ -21,10 +25,10 @@ Feature: Granular cache flushing operations
       WP_CLI::add_hook( 'after_invoke:cache flush-post', $verify_cache_cleared );
       """
 
-    When I run `wp cache flush-post 123`
+    When I run `wp cache flush-post 1`
     Then STDOUT should contain:
       """
-      Success: Post cache for ID 123 cleared.
+      Success: Post cache for ID 1 cleared.
       """
 
   @skip-object-cache
@@ -34,13 +38,22 @@ Feature: Granular cache flushing operations
       """
       <?php
       $cache_term = function(){
-        wp_cache_set( 5, array( 'term_id' => 5 ), 'terms' );
-        wp_cache_set( 5, array(), 'term_meta' );
+        // Prime the caches for the "Uncategorized" term created by the install,
+        // with a stale name so that a refreshed cache entry can be told apart.
+        $term       = get_term( 1 )->data;
+        $term->name = 'Stale';
+        wp_cache_set( 1, $term, 'terms' );
+        get_term_meta( 1 );
+        if ( false === wp_cache_get( 1, 'term_meta' ) ) {
+          WP_CLI::error( 'Cache was not primed.' );
+        }
       };
       $verify_cache_cleared = function(){
-        $term = wp_cache_get( 5, 'terms' );
-        $meta = wp_cache_get( 5, 'term_meta' );
-        if ( false !== $term || false !== $meta ) {
+        // Cleaning a category rebuilds the term hierarchy, which can re-cache
+        // the term from the database, so only check that the stale entry is gone.
+        $term = wp_cache_get( 1, 'terms' );
+        $meta = wp_cache_get( 1, 'term_meta' );
+        if ( ( false !== $term && 'Stale' === $term->name ) || false !== $meta ) {
           WP_CLI::error( 'Cache was not properly cleared.' );
         }
       };
@@ -48,10 +61,10 @@ Feature: Granular cache flushing operations
       WP_CLI::add_hook( 'after_invoke:cache flush-term', $verify_cache_cleared );
       """
 
-    When I run `wp cache flush-term 5`
+    When I run `wp cache flush-term 1`
     Then STDOUT should contain:
       """
-      Success: Term cache for ID 5 cleared.
+      Success: Term cache for ID 1 cleared.
       """
 
   @skip-object-cache
@@ -98,8 +111,12 @@ Feature: Granular cache flushing operations
       """
       <?php
       $cache_user = function(){
-        wp_cache_set( 1, array( 'ID' => 1 ), 'users' );
-        wp_cache_set( 1, array(), 'user_meta' );
+        // Prime the caches for the admin user created by the install.
+        get_userdata( 1 );
+        get_user_meta( 1 );
+        if ( false === wp_cache_get( 1, 'users' ) || false === wp_cache_get( 1, 'user_meta' ) ) {
+          WP_CLI::error( 'Cache was not primed.' );
+        }
       };
       $verify_cache_cleared = function(){
         $user = wp_cache_get( 1, 'users' );
