@@ -5,19 +5,19 @@ Feature: Patch command available for the object cache
     And a wp-content/mu-plugins/test-harness.php file:
       """php
       <?php
-      $set_foo = function(){
-        wp_cache_set( 'my_key', ['foo' => 'bar'] );
-        wp_cache_set( 'other_key', ['fuz' => 'biz'] );
-        wp_cache_set( 'my_key_in_group', ['fuz' => 'biz'], 'my_group' );
+      $set_foo = function () {
+          wp_cache_set( 'my_key', [ 'foo' => 'bar' ] );
+          wp_cache_set( 'other_key', [ 'fuz' => 'biz' ] );
+          wp_cache_set( 'my_key_in_group', [ 'fuz' => 'biz' ], 'my_group' );
 
-        $complex_key = (object) [
-            'foo' => (object) [
-                'bar' => (object) [
-                    'baz' => 2,
-                ],
-            ],
-        ];
-        wp_cache_set( 'complex_key', $complex_key );
+          $complex_key = (object) [
+              'foo' => (object) [
+                  'bar' => (object) [
+                      'baz' => 2,
+                  ],
+              ],
+          ];
+          wp_cache_set( 'complex_key', $complex_key );
       };
 
       WP_CLI::add_hook( 'before_invoke:cache patch', $set_foo );

@@ -4,16 +4,16 @@ Feature: Managed the WordPress object cache
   Scenario: Default group is 'default'
     Given a WP install
     And a wp-content/mu-plugins/test-harness.php file:
-      """
+      """php
       <?php
-      $set_foo = function(){
-        wp_cache_set( 'foo', 'bar' );
+      $set_foo = function () {
+          wp_cache_set( 'foo', 'bar' );
       };
-      $set_foo_value = function() {
-        wp_cache_set( 'foo', 2 );
+      $set_foo_value = function () {
+          wp_cache_set( 'foo', 2 );
       };
-      $log_foo_value = function() {
-        WP_CLI::log( var_export( wp_cache_get( 'foo' ), true ) );
+      $log_foo_value = function () {
+          WP_CLI::log( var_export( wp_cache_get( 'foo' ), true ) );
       };
       WP_CLI::add_hook( 'before_invoke:cache get', $set_foo );
       WP_CLI::add_hook( 'before_invoke:cache delete', $set_foo );
@@ -150,12 +150,12 @@ Feature: Managed the WordPress object cache
       """php
       <?php
       class Dummy_Object_Cache extends WP_Object_Cache {
-        public function flush_group( $group ) {
-          if ( $group === 'permanent_root_cache' ) {
-            return false;
+          public function flush_group( $group ) {
+              if ( $group === 'permanent_root_cache' ) {
+                  return false;
+              }
+              return parent::flush_group( $group );
           }
-          return parent::flush_group( $group );
-        }
       }
       $GLOBALS['wp_object_cache'] = new Dummy_Object_Cache();
       """
@@ -172,12 +172,12 @@ Feature: Managed the WordPress object cache
       """php
       <?php
       class Dummy_Object_Cache extends WP_Object_Cache {
-        public function flush_group( $group ) {
-          if ( $group === 'permanent_root_cache' ) {
-            return false;
+          public function flush_group( $group ) {
+              if ( $group === 'permanent_root_cache' ) {
+                  return false;
+              }
+              return parent::flush_group( $group );
           }
-          return parent::flush_group( $group );
-        }
       }
       $GLOBALS['wp_object_cache'] = new Dummy_Object_Cache();
       """

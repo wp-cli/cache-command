@@ -521,7 +521,7 @@ network|site cache, please see docs for `wp transient`.
 
 	[--network]
 		Delete the value of a network|site transient. On single site, this is
-		is a specially-named cache key. On multisite, this is a global cache
+		a specially-named cache key. On multisite, this is a global cache
 		(instead of local to the site).
 
 	[--all]
@@ -586,7 +586,7 @@ network|site cache, please see docs for `wp transient`.
 
 	[--network]
 		Get the value of a network|site transient. On single site, this is
-		is a specially-named cache key. On multisite, this is a global cache
+		a specially-named cache key. On multisite, this is a global cache
 		(instead of local to the site).
 
 **EXAMPLES**
@@ -773,7 +773,7 @@ network|site cache, please see docs for `wp transient`.
 
 	[--network]
 		Set the value of a network|site transient. On single site, this is
-		is a specially-named cache key. On multisite, this is a global cache
+		a specially-named cache key. On multisite, this is a global cache
 		(instead of local to the site).
 
 **EXAMPLES**

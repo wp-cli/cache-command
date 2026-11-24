@@ -67,7 +67,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--network]
 	 * : Get the value of a network|site transient. On single site, this is
-	 * is a specially-named cache key. On multisite, this is a global cache
+	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
 	 *
 	 * ## EXAMPLES
@@ -116,7 +116,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--network]
 	 * : Set the value of a network|site transient. On single site, this is
-	 * is a specially-named cache key. On multisite, this is a global cache
+	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
 	 *
 	 * ## EXAMPLES
@@ -153,7 +153,7 @@ class Transient_Command extends WP_CLI_Command {
 	 *
 	 * [--network]
 	 * : Delete the value of a network|site transient. On single site, this is
-	 * is a specially-named cache key. On multisite, this is a global cache
+	 * a specially-named cache key. On multisite, this is a global cache
 	 * (instead of local to the site).
 	 *
 	 * [--all]
@@ -193,9 +193,9 @@ class Transient_Command extends WP_CLI_Command {
 	public function delete( $args, $assoc_args ) {
 		$key = ( ! empty( $args ) ) ? $args[0] : null;
 
-		$all     = Utils\get_flag_value( $assoc_args, 'all' );
-		$expired = Utils\get_flag_value( $assoc_args, 'expired' );
-		$network = Utils\get_flag_value( $assoc_args, 'network' );
+		$all     = Utils\get_flag_value( $assoc_args, 'all', false );
+		$expired = Utils\get_flag_value( $assoc_args, 'expired', false );
+		$network = Utils\get_flag_value( $assoc_args, 'network', false );
 
 		if ( true === $all ) {
 			$this->delete_all( $network );
