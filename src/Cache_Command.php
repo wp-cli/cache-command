@@ -620,7 +620,8 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>]
-	 * : Post ID. If not specified, clears all post caches.
+	 * : Post ID. If not specified, clears all post caches, which requires
+	 * WordPress 6.1+ and an object cache that supports group flushing.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -636,10 +637,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function flush_post( $args ) {
 		if ( ! empty( $args ) ) {
-			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
-				WP_CLI::error( 'Please provide a valid post ID.' );
-			}
-			$post_id = (int) $args[0];
+			$post_id = $this->get_object_id( $args[0], 'post' );
 			clean_post_cache( $post_id );
 			WP_CLI::success( "Post cache for ID $post_id cleared." );
 		} else {
@@ -660,7 +658,8 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>]
-	 * : Term ID. If not specified, clears all term caches.
+	 * : Term ID. If not specified, clears all term caches, which requires
+	 * WordPress 6.1+ and an object cache that supports group flushing.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -676,10 +675,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function flush_term( $args ) {
 		if ( ! empty( $args ) ) {
-			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
-				WP_CLI::error( 'Please provide a valid term ID.' );
-			}
-			$term_id  = (int) $args[0];
+			$term_id  = $this->get_object_id( $args[0], 'term' );
 			$term     = get_term( $term_id );
 			$taxonomy = ( $term && ! is_wp_error( $term ) ) ? $term->taxonomy : '';
 			clean_term_cache( $term_id, $taxonomy );
@@ -703,7 +699,8 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>]
-	 * : Comment ID. If not specified, clears all comment caches.
+	 * : Comment ID. If not specified, clears all comment caches, which requires
+	 * WordPress 6.1+ and an object cache that supports group flushing.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -719,10 +716,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function flush_comment( $args ) {
 		if ( ! empty( $args ) ) {
-			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
-				WP_CLI::error( 'Please provide a valid comment ID.' );
-			}
-			$comment_id = (int) $args[0];
+			$comment_id = $this->get_object_id( $args[0], 'comment' );
 			clean_comment_cache( $comment_id );
 			wp_cache_delete( $comment_id, 'comment_meta' );
 			WP_CLI::success( "Comment cache for ID $comment_id cleared." );
@@ -740,7 +734,8 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>]
-	 * : User ID. If not specified, clears all user caches.
+	 * : User ID. If not specified, clears all user caches, which requires
+	 * WordPress 6.1+ and an object cache that supports group flushing.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -756,10 +751,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	public function flush_user( $args ) {
 		if ( ! empty( $args ) ) {
-			if ( ! is_numeric( $args[0] ) || (int) $args[0] <= 0 ) {
-				WP_CLI::error( 'Please provide a valid user ID.' );
-			}
-			$user_id = (int) $args[0];
+			$user_id = $this->get_object_id( $args[0], 'user' );
 			clean_user_cache( $user_id );
 			wp_cache_delete( $user_id, 'user_meta' );
 			WP_CLI::success( "User cache for ID $user_id cleared." );
@@ -777,7 +769,8 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<name>]
-	 * : Option name. If not specified, clears all option caches.
+	 * : Option name. If not specified, clears all option caches, which requires
+	 * WordPress 6.1+ and an object cache that supports group flushing.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -805,6 +798,24 @@ class Cache_Command extends WP_CLI_Command {
 	}
 
 	/**
+	 * Validates an object ID argument.
+	 *
+	 * Only accepts positive integers, so that values like "1.5" or "1e3" are not
+	 * silently turned into another ID.
+	 *
+	 * @param string $arg  The ID argument.
+	 * @param string $type Object type, used in the error message.
+	 * @return int The object ID.
+	 */
+	private function get_object_id( $arg, $type ) {
+		if ( ! preg_match( '/^[0-9]+$/', $arg ) || (int) $arg <= 0 ) {
+			WP_CLI::error( "Please provide a valid {$type} ID." );
+		}
+
+		return (int) $arg;
+	}
+
+	/**
 	 * Flushes the given cache groups, erroring out if group flushing is unavailable or fails.
 	 *
 	 * @param string        $type   Object type, used in error messages.
@@ -812,7 +823,7 @@ class Cache_Command extends WP_CLI_Command {
 	 */
 	private function flush_cache_groups( $type, $groups ) {
 		if ( ! function_exists( 'wp_cache_supports' ) || ! function_exists( 'wp_cache_flush_group' ) || ! wp_cache_supports( 'flush_group' ) ) {
-			WP_CLI::error( "Flushing all {$type} caches requires WordPress 6.1+" );
+			WP_CLI::error( "Flushing all {$type} caches requires WordPress 6.1+ and an object cache that supports group flushing." );
 		}
 
 		foreach ( $groups as $group ) {

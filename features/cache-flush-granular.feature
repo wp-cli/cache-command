@@ -205,7 +205,7 @@ Feature: Granular cache flushing operations
       """
 
   @skip-object-cache
-  Scenario Outline: Non-positive post IDs fail gracefully
+  Scenario Outline: Non-positive or non-integer post IDs fail gracefully
     Given a WP install
 
     When I try `wp cache flush-post <id>`
@@ -215,9 +215,11 @@ Feature: Granular cache flushing operations
       """
 
     Examples:
-      | id |
-      | 0  |
-      | -1 |
+      | id  |
+      | 0   |
+      | -1  |
+      | 1.5 |
+      | 1e3 |
 
   @skip-object-cache
   Scenario Outline: Non-positive term IDs fail gracefully
@@ -434,6 +436,6 @@ Feature: Granular cache flushing operations
     When I try `wp cache flush-post`
     Then STDERR should be:
       """
-      Error: Flushing all post caches requires WordPress 6.1+
+      Error: Flushing all post caches requires WordPress 6.1+ and an object cache that supports group flushing.
       """
     And the return code should be 1
